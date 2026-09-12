@@ -1,0 +1,201 @@
+id,name,channel,region,total_stores
+1,FreshMart,Grocery,North America,162
+2,MetroBazaar,Grocery,North America,792
+3,GreenAisle,Grocery,North America,682
+4,PrimeGrocer,Grocery,North America,483
+5,DailyBasket,Grocery,North America,478
+6,SunriseMart,Grocery,North America,869
+7,UrbanPantry,Grocery,North America,159
+8,ValueGrocer,Grocery,North America,721
+9,CityMart,Grocery,North America,265
+10,HomeFresh,Grocery,North America,166
+11,FreshMart #2,Grocery,North America,564
+12,MetroBazaar #2,Grocery,North America,977
+13,GreenAisle #2,Grocery,North America,756
+14,SaverClub,Club,North America,780
+15,BulkBasket Club,Club,North America,740
+16,WareClub,Club,North America,803
+17,MegaValue Club,Club,North America,552
+18,SaverClub #2,Club,North America,197
+19,GreenLeaf Naturals,Natural,North America,852
+20,PureRoots Market,Natural,North America,494
+21,EarthAisle,Natural,North America,540
+22,NaturaLife Market,Natural,North America,421
+23,GreenLeaf Naturals #2,Natural,North America,247
+24,PureRoots Market #2,Natural,North America,932
+25,QuickStop,C-Store,North America,1516
+26,CornerFuel Mart,C-Store,North America,1337
+27,GoStop,C-Store,North America,1023
+28,ExpressStop,C-Store,North America,1569
+29,QuickStop #2,C-Store,North America,1209
+30,CornerFuel Mart #2,C-Store,North America,1076
+31,GoStop #2,C-Store,North America,1085
+32,ExpressStop #2,C-Store,North America,795
+33,QuickStop #3,C-Store,North America,619
+34,CornerFuel Mart #3,C-Store,North America,1220
+35,GoStop #3,C-Store,North America,1654
+36,FreshMart (Metro),Grocery,India - Metro,138
+37,MetroBazaar (Metro),Grocery,India - Metro,869
+38,GreenAisle (Metro),Grocery,India - Metro,841
+39,PrimeGrocer (Metro),Grocery,India - Metro,334
+40,DailyBasket (Metro),Grocery,India - Metro,661
+41,SunriseMart (Metro),Grocery,India - Metro,232
+42,QuickStop (Metro),C-Store,India - Metro,1485
+43,CornerFuel Mart (Metro),C-Store,India - Metro,1410
+44,GoStop (Metro),C-Store,India - Metro,960
+45,ExpressStop (Metro),C-Store,India - Metro,588
+46,QuickDash (Metro),Quick Commerce,India - Metro,878
+47,ZipCart (Metro),Quick Commerce,India - Metro,484
+48,DashKart (Metro),Quick Commerce,India - Metro,819
+49,SwiftBasket (Metro),Quick Commerce,India - Metro,658
+50,HopMart (Metro),Quick Commerce,India - Metro,733
+51,FlashCart (Metro),Quick Commerce,India - Metro,719
+52,NimbleMart (Metro),Quick Commerce,India - Metro,295
+53,RapidBasket (Metro),Quick Commerce,India - Metro,422
+54,GoCart Express (Metro),Quick Commerce,India - Metro,500
+55,DartMart (Metro),Quick Commerce,India - Metro,523
+56,QuickDash #2 (Metro),Quick Commerce,India - Metro,182
+57,Local Trade Collective (Metro),General Trade,India - Metro,3959
+58,ValueTrade GT (Metro),General Trade,India - Metro,2194
+59,Neighborhood Wholesale (Metro),General Trade,India - Metro,4845
+60,Corner Store Network (Metro),General Trade,India - Metro,4573
+61,Community Retail Co-op (Metro),General Trade,India - Metro,5651
+62,Bazaar Wholesale (Metro),General Trade,India - Metro,4851
+63,MarketLink GT (Metro),General Trade,India - Metro,3149
+64,Sundry Traders Network (Metro),General Trade,India - Metro,5853
+65,FreshMart (Tier 2/3),Grocery,India - Tier 2/3,457
+66,MetroBazaar (Tier 2/3),Grocery,India - Tier 2/3,379
+67,GreenAisle (Tier 2/3),Grocery,India - Tier 2/3,913
+68,PrimeGrocer (Tier 2/3),Grocery,India - Tier 2/3,420
+69,DailyBasket (Tier 2/3),Grocery,India - Tier 2/3,150
+70,SunriseMart (Tier 2/3),Grocery,India - Tier 2/3,511
+71,UrbanPantry (Tier 2/3),Grocery,India - Tier 2/3,812
+72,ValueGrocer (Tier 2/3),Grocery,India - Tier 2/3,254
+73,Local Trade Collective (Tier 2/3),General Trade,India - Tier 2/3,3583
+74,ValueTrade GT (Tier 2/3),General Trade,India - Tier 2/3,2084
+75,Neighborhood Wholesale (Tier 2/3),General Trade,India - Tier 2/3,4589
+76,Corner Store Network (Tier 2/3),General Trade,India - Tier 2/3,3640
+77,Community Retail Co-op (Tier 2/3),General Trade,India - Tier 2/3,2985
+78,Bazaar Wholesale (Tier 2/3),General Trade,India - Tier 2/3,2521
+79,MarketLink GT (Tier 2/3),General Trade,India - Tier 2/3,4040
+80,Sundry Traders Network (Tier 2/3),General Trade,India - Tier 2/3,4514
+81,Local Trade Collective #2 (Tier 2/3),General Trade,India - Tier 2/3,5731
+82,ValueTrade GT #2 (Tier 2/3),General Trade,India - Tier 2/3,3467
+83,Neighborhood Wholesale #2 (Tier 2/3),General Trade,India - Tier 2/3,2223
+84,Corner Store Network #2 (Tier 2/3),General Trade,India - Tier 2/3,5247
+85,Community Retail Co-op #2 (Tier 2/3),General Trade,India - Tier 2/3,4333
+86,Bazaar Wholesale #2 (Tier 2/3),General Trade,India - Tier 2/3,4651
+87,MarketLink GT #2 (Tier 2/3),General Trade,India - Tier 2/3,1937
+88,Sundry Traders Network #2 (Tier 2/3),General Trade,India - Tier 2/3,2905
+89,Local Trade Collective #3 (Tier 2/3),General Trade,India - Tier 2/3,4955
+90,FreshMart (UAE),Grocery,Gulf - UAE,845
+91,MetroBazaar (UAE),Grocery,Gulf - UAE,480
+92,GreenAisle (UAE),Grocery,Gulf - UAE,820
+93,PrimeGrocer (UAE),Grocery,Gulf - UAE,854
+94,DailyBasket (UAE),Grocery,Gulf - UAE,436
+95,SunriseMart (UAE),Grocery,Gulf - UAE,906
+96,UrbanPantry (UAE),Grocery,Gulf - UAE,345
+97,SaverClub (UAE),Club,Gulf - UAE,300
+98,BulkBasket Club (UAE),Club,Gulf - UAE,707
+99,WareClub (UAE),Club,Gulf - UAE,665
+100,QuickDash (UAE),Quick Commerce,Gulf - UAE,254
+101,ZipCart (UAE),Quick Commerce,Gulf - UAE,774
+102,DashKart (UAE),Quick Commerce,Gulf - UAE,299
+103,SwiftBasket (UAE),Quick Commerce,Gulf - UAE,753
+104,HopMart (UAE),Quick Commerce,Gulf - UAE,155
+105,FlashCart (UAE),Quick Commerce,Gulf - UAE,747
+106,NimbleMart (UAE),Quick Commerce,Gulf - UAE,740
+107,Local Trade Collective (UAE),General Trade,Gulf - UAE,5011
+108,ValueTrade GT (UAE),General Trade,Gulf - UAE,4491
+109,Neighborhood Wholesale (UAE),General Trade,Gulf - UAE,3622
+110,Corner Store Network (UAE),General Trade,Gulf - UAE,4673
+111,Community Retail Co-op (UAE),General Trade,Gulf - UAE,2747
+112,FreshMart (Saudi),Grocery,Gulf - Saudi,798
+113,MetroBazaar (Saudi),Grocery,Gulf - Saudi,591
+114,GreenAisle (Saudi),Grocery,Gulf - Saudi,502
+115,PrimeGrocer (Saudi),Grocery,Gulf - Saudi,545
+116,DailyBasket (Saudi),Grocery,Gulf - Saudi,603
+117,SunriseMart (Saudi),Grocery,Gulf - Saudi,114
+118,Local Trade Collective (Saudi),General Trade,Gulf - Saudi,2129
+119,ValueTrade GT (Saudi),General Trade,Gulf - Saudi,2604
+120,Neighborhood Wholesale (Saudi),General Trade,Gulf - Saudi,2015
+121,Corner Store Network (Saudi),General Trade,Gulf - Saudi,3478
+122,Community Retail Co-op (Saudi),General Trade,Gulf - Saudi,4507
+123,Bazaar Wholesale (Saudi),General Trade,Gulf - Saudi,4444
+124,MarketLink GT (Saudi),General Trade,Gulf - Saudi,3619
+125,Sundry Traders Network (Saudi),General Trade,Gulf - Saudi,5347
+126,Local Trade Collective #2 (Saudi),General Trade,Gulf - Saudi,4043
+127,FreshMart (Qatar),Grocery,Gulf - Qatar,152
+128,MetroBazaar (Qatar),Grocery,Gulf - Qatar,783
+129,GreenAisle (Qatar),Grocery,Gulf - Qatar,608
+130,PrimeGrocer (Qatar),Grocery,Gulf - Qatar,663
+131,DailyBasket (Qatar),Grocery,Gulf - Qatar,600
+132,QuickDash (Qatar),Quick Commerce,Gulf - Qatar,565
+133,ZipCart (Qatar),Quick Commerce,Gulf - Qatar,217
+134,DashKart (Qatar),Quick Commerce,Gulf - Qatar,569
+135,SwiftBasket (Qatar),Quick Commerce,Gulf - Qatar,746
+136,HopMart (Qatar),Quick Commerce,Gulf - Qatar,377
+137,Local Trade Collective (Qatar),General Trade,Gulf - Qatar,4212
+138,ValueTrade GT (Qatar),General Trade,Gulf - Qatar,1638
+139,Neighborhood Wholesale (Qatar),General Trade,Gulf - Qatar,3063
+140,Corner Store Network (Qatar),General Trade,Gulf - Qatar,3465
+141,Community Retail Co-op (Qatar),General Trade,Gulf - Qatar,5922
+142,FreshMart (Malaysia),Grocery,SEA - Malaysia,277
+143,MetroBazaar (Malaysia),Grocery,SEA - Malaysia,334
+144,GreenAisle (Malaysia),Grocery,SEA - Malaysia,455
+145,PrimeGrocer (Malaysia),Grocery,SEA - Malaysia,993
+146,DailyBasket (Malaysia),Grocery,SEA - Malaysia,865
+147,SunriseMart (Malaysia),Grocery,SEA - Malaysia,111
+148,QuickDash (Malaysia),Quick Commerce,SEA - Malaysia,325
+149,ZipCart (Malaysia),Quick Commerce,SEA - Malaysia,766
+150,DashKart (Malaysia),Quick Commerce,SEA - Malaysia,193
+151,SwiftBasket (Malaysia),Quick Commerce,SEA - Malaysia,791
+152,HopMart (Malaysia),Quick Commerce,SEA - Malaysia,361
+153,FlashCart (Malaysia),Quick Commerce,SEA - Malaysia,838
+154,Local Trade Collective (Malaysia),General Trade,SEA - Malaysia,2821
+155,ValueTrade GT (Malaysia),General Trade,SEA - Malaysia,3454
+156,Neighborhood Wholesale (Malaysia),General Trade,SEA - Malaysia,4478
+157,Corner Store Network (Malaysia),General Trade,SEA - Malaysia,2068
+158,Community Retail Co-op (Malaysia),General Trade,SEA - Malaysia,4006
+159,Bazaar Wholesale (Malaysia),General Trade,SEA - Malaysia,3772
+160,MarketLink GT (Malaysia),General Trade,SEA - Malaysia,5027
+161,Sundry Traders Network (Malaysia),General Trade,SEA - Malaysia,5982
+162,FreshMart (Philippines),Grocery,SEA - Philippines,691
+163,MetroBazaar (Philippines),Grocery,SEA - Philippines,456
+164,GreenAisle (Philippines),Grocery,SEA - Philippines,453
+165,PrimeGrocer (Philippines),Grocery,SEA - Philippines,464
+166,DailyBasket (Philippines),Grocery,SEA - Philippines,828
+167,SunriseMart (Philippines),Grocery,SEA - Philippines,375
+168,QuickDash (Philippines),Quick Commerce,SEA - Philippines,275
+169,ZipCart (Philippines),Quick Commerce,SEA - Philippines,400
+170,DashKart (Philippines),Quick Commerce,SEA - Philippines,167
+171,SwiftBasket (Philippines),Quick Commerce,SEA - Philippines,229
+172,HopMart (Philippines),Quick Commerce,SEA - Philippines,217
+173,Local Trade Collective (Philippines),General Trade,SEA - Philippines,4971
+174,ValueTrade GT (Philippines),General Trade,SEA - Philippines,4750
+175,Neighborhood Wholesale (Philippines),General Trade,SEA - Philippines,4635
+176,Corner Store Network (Philippines),General Trade,SEA - Philippines,3578
+177,Community Retail Co-op (Philippines),General Trade,SEA - Philippines,4726
+178,Bazaar Wholesale (Philippines),General Trade,SEA - Philippines,2225
+179,MarketLink GT (Philippines),General Trade,SEA - Philippines,5552
+180,Sundry Traders Network (Philippines),General Trade,SEA - Philippines,3754
+181,FreshMart (Indonesia),Grocery,SEA - Indonesia,943
+182,MetroBazaar (Indonesia),Grocery,SEA - Indonesia,220
+183,GreenAisle (Indonesia),Grocery,SEA - Indonesia,537
+184,PrimeGrocer (Indonesia),Grocery,SEA - Indonesia,720
+185,DailyBasket (Indonesia),Grocery,SEA - Indonesia,535
+186,SunriseMart (Indonesia),Grocery,SEA - Indonesia,490
+187,QuickDash (Indonesia),Quick Commerce,SEA - Indonesia,274
+188,ZipCart (Indonesia),Quick Commerce,SEA - Indonesia,435
+189,DashKart (Indonesia),Quick Commerce,SEA - Indonesia,329
+190,SwiftBasket (Indonesia),Quick Commerce,SEA - Indonesia,376
+191,HopMart (Indonesia),Quick Commerce,SEA - Indonesia,662
+192,FlashCart (Indonesia),Quick Commerce,SEA - Indonesia,622
+193,Local Trade Collective (Indonesia),General Trade,SEA - Indonesia,4232
+194,ValueTrade GT (Indonesia),General Trade,SEA - Indonesia,3128
+195,Neighborhood Wholesale (Indonesia),General Trade,SEA - Indonesia,5818
+196,Corner Store Network (Indonesia),General Trade,SEA - Indonesia,1894
+197,Community Retail Co-op (Indonesia),General Trade,SEA - Indonesia,3041
+198,Bazaar Wholesale (Indonesia),General Trade,SEA - Indonesia,2031
+199,MarketLink GT (Indonesia),General Trade,SEA - Indonesia,3025
+200,Sundry Traders Network (Indonesia),General Trade,SEA - Indonesia,5828
