@@ -4,9 +4,10 @@ import { useState } from "react";
 
 export default function FeedbackButtons({ insightSummary }: { insightSummary: string }) {
   const [sent, setSent] = useState<"worked" | "didnt_work" | null>(null);
+  const [sending, setSending] = useState(false);
 
   async function send(outcome: "worked" | "didnt_work") {
-    setSent(outcome);
+    setSending(true);
     try {
       await fetch("/api/feedback", {
         method: "POST",
@@ -14,7 +15,10 @@ export default function FeedbackButtons({ insightSummary }: { insightSummary: st
         body: JSON.stringify({ insight_summary: insightSummary, outcome }),
       });
     } catch (err) {
-      console.error("Failed to log feedback:", err);
+      console.error("[v0] Failed to log feedback:", err);
+      setSent(null);
+    } finally {
+      setSending(false);
     }
   }
 
@@ -22,7 +26,7 @@ export default function FeedbackButtons({ insightSummary }: { insightSummary: st
     <div className="mt-3 flex items-center gap-3 text-sm">
       <button
         onClick={() => send("worked")}
-        disabled={sent !== null}
+        disabled={sent !== null || sending}
         className={`px-2 py-1 rounded-md transition-colors ${
           sent === "worked" ? "bg-green-600/30 text-green-300" : "hover:bg-white/10"
         }`}
@@ -31,7 +35,7 @@ export default function FeedbackButtons({ insightSummary }: { insightSummary: st
       </button>
       <button
         onClick={() => send("didnt_work")}
-        disabled={sent !== null}
+        disabled={sent !== null || sending}
         className={`px-2 py-1 rounded-md transition-colors ${
           sent === "didnt_work" ? "bg-red-600/30 text-red-300" : "hover:bg-white/10"
         }`}

@@ -50,9 +50,10 @@ export async function POST(req: NextRequest) {
 
     const resolvedAudience = resolveAudience(message, audience);
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) {
-      return NextResponse.json({ error: "GEMINI_API_KEY is not configured on the server." }, { status: 500 });
+      console.error("[v0] Missing GEMINI_API_KEY in the server runtime");
+      return NextResponse.json({ error: "Gemini is not configured on the server. Add GEMINI_API_KEY to the active deployment environment and redeploy." }, { status: 503 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);

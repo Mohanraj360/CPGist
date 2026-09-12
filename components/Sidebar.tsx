@@ -13,13 +13,21 @@ const TEMPLATES = [
 export { TEMPLATES };
 
 export default function Sidebar({ onSelectTemplate }: { onSelectTemplate: (prompt: string) => void }) {
+  function selectTemplate(prompt: string) {
+    try {
+      onSelectTemplate(prompt);
+    } catch (error) {
+      console.error("[v0] Could not select workflow", error);
+    }
+  }
+
   return (
     <aside className="hidden w-[224px] shrink-0 border-r border-[var(--line)] bg-white p-4 xl:block">
-      <button type="button" onClick={() => onSelectTemplate("")} className="mb-6 flex w-full items-center justify-between rounded-lg bg-[var(--navy)] px-3 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"><span>New analysis</span><span className="text-lg leading-none">+</span></button>
+      <button type="button" onClick={() => selectTemplate("")} className="mb-6 flex w-full items-center justify-between rounded-lg bg-[var(--navy)] px-3 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"><span>New analysis</span><span className="text-lg leading-none">+</span></button>
       <p className="mb-3 px-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)]">Verified workflows</p>
       <div className="flex flex-col gap-1">
         {TEMPLATES.map((template) => (
-          <button key={template.label} type="button" onClick={() => onSelectTemplate(template.prompt)} className="group flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:bg-[var(--canvas)] hover:text-[var(--ink)]"><span className="truncate">{template.label}</span><span className="ml-2 text-[10px] text-[var(--line-strong)] transition-colors group-hover:text-[var(--mint-strong)]">→</span></button>
+          <button key={template.label} type="button" onClick={() => selectTemplate(template.prompt)} className="group flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs text-[var(--muted)] transition-colors hover:bg-[var(--canvas)] hover:text-[var(--ink)]"><span className="truncate">{template.label}</span><span className="ml-2 text-[10px] text-[var(--line-strong)] transition-colors group-hover:text-[var(--mint-strong)]">→</span></button>
         ))}
       </div>
     </aside>
