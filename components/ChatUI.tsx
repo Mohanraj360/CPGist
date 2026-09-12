@@ -28,8 +28,11 @@ export default function ChatUI() {
     setInput(""); setLoading(true);
     try {
       const res = await fetch("/api/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, audience }) });
-      const data = await res.json();
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "agent", text: res.ok ? data.narrative : `Something went wrong: ${data.error}`, recommendations: data.recommendations, chartData: data.chartData, sourceTrace: data.sourceTrace, audience: data.audience }]);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Analysis failed (${res.status}).`);
+      }
+      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "agent", text: data.narrative || "The analyst returned no narrative.", recommendations: data.recommendations, chartData: data.chartData, sourceTrace: data.sourceTrace, audience: data.audience }]);
     } catch (err: any) {
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "agent", text: `Request failed: ${err.message}` }]);
     } finally { setLoading(false); }
