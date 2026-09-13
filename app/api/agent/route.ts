@@ -70,23 +70,32 @@ export async function POST(req: NextRequest) {
       const call = result.response.functionCalls()?.[0];
       if (!call) break;
 
-      const toolResult = await callTool(call.name, call.args);
+      let toolResult: Record<string, unknown>;
+      try {
+        toolResult = (await callTool(call.name, call.args)) as Record<string, unknown>;
+      } catch (toolError) {
+        console.warn(`[v0] Optional dataset unavailable for ${call.name}:`, toolError);
+        toolResult = {
+          ok: false,
+          data_available: false,
+          message: "No connected retail data was available for this analysis. Use general CPG business knowledge and state that the response is not data-grounded.",
+          source_tables: [],
+        };
+      }
 
       sourceTrace.push({
         tool: call.name,
         args: call.args as Record<string, unknown>,
-        source_tables: (toolResult as any).source_tables ?? [],
+        source_tables: Array.isArray(toolResult.source_tables) ? toolResult.source_tables as string[] : [],
       });
 
-      // Keep the most recent tool result around as a chart-data candidate —
-      // the frontend decides how (or whether) to render it.
-      chartData = toolResult;
+      if (toolResult.ok !== false) chartData = toolResult;
 
       result = await chat.sendMessage([
         {
           functionResponse: {
             name: call.name,
-            response: toolResult as Record<string, unknown>,
+            response: toolResult,
           },
         },
       ]);
