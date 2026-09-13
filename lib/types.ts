@@ -21,6 +21,10 @@ export interface ChatMessage {
   id: string;
   role: "user" | "agent";
   text: string;
+  executiveSummary?: string;
+  metrics?: Array<{ label: string; value: string }>;
+  insights?: string[];
+  followUpQuestions?: string[];
   recommendations?: string[];
   chartData?: unknown;
   sourceTrace?: SourceTraceEntry[];
