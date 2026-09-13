@@ -25,12 +25,12 @@ export default function ChatUI({ initialContext = null }: { initialContext?: Ana
   const [loading, setLoading] = useState(false);
   const [audience, setAudience] = useState<AudienceSelection>("auto");
 
-  async function send(text: string) {
+  async function send(text: string, options: { recordUser?: boolean } = {}) {
     if (!text.trim() || loading) return;
-    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", text }]);
+    if (options.recordUser !== false) setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", text }]);
     setInput(""); setLoading(true);
     try {
-      const res = await fetch("/api/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, audience }) });
+      const res = await fetch("/api/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: context?.prompt ? `${context.prompt}\n\nCurrent workflow context: ${context.label}` : text, audience }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const message = res.status === 429 ? "AI usage limit reached. Please try again shortly." : data.errorCode === "AI_PROVIDER_FAILED" ? "We could not retrieve the required retail data." : data.message || `Analysis failed (${res.status}).`;
