@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Requires a valid insight summary and outcome." }, { status: 400 });
     }
 
-    const sb = getSupabaseServerClient();
+    const sb = await getSupabaseServerClient();
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
 

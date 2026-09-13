@@ -38,8 +38,9 @@ export default function ChatUI({ initialContext = null }: { initialContext?: Ana
       setMessages((prev) => [...prev, {
         id: crypto.randomUUID(),
         role: "agent",
-        text: data.answer || data.narrative || "The analyst returned no narrative.",
+        text: data.answer || data.narrative || data.message || "The analyst returned no narrative.",
         executiveSummary: data.executiveSummary,
+        dataAvailable: data.dataAvailable,
         metrics: data.metrics,
         insights: data.insights,
         recommendations: data.recommendations,

@@ -5,7 +5,7 @@ export interface ChannelMixArgs {
 }
 
 export async function getChannelMix(args: ChannelMixArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   const { data, error } = await sb
     .from("v_channel_mix")

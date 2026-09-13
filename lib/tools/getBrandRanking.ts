@@ -8,7 +8,7 @@ export interface BrandRankingArgs {
 
 // Ranks brands within a category by total $ sales (and share), using v_brand_share.
 export async function getBrandRanking(args: BrandRankingArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   let query = sb
     .from("v_brand_share")

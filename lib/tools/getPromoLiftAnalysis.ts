@@ -9,7 +9,7 @@ export interface PromoLiftArgs {
 // Pulls promo-week lift rows from v_promo_lift, optionally filtered by brand
 // name and retailer. The view exposes brand_name at product grain.
 export async function getPromoLiftAnalysis(args: PromoLiftArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   let query = sb
     .from("v_promo_lift")

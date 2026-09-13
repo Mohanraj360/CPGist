@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const sb = getSupabaseServerClient();
+    const sb = await getSupabaseServerClient();
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
 

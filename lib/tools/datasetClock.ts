@@ -33,7 +33,7 @@ let cachedAsOf: string | null = null;
 export async function getDatasetAsOfDate(client?: SupabaseClient): Promise<string> {
   if (cachedAsOf) return cachedAsOf;
 
-  const sb = client ?? getSupabaseServerClient();
+  const sb = client ?? await getSupabaseServerClient();
   const { data, error } = await sb
     .from("sales_facts")
     .select("week_ending")
