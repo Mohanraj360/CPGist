@@ -32,13 +32,14 @@ export default function AlertsFeed() {
 
     async function load() {
       try {
-        const res = await fetch("/api/alerts");
-        const data = await res.json();
+        const res = await fetch("/api/alerts", { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
         if (cancelled) return;
         if (!res.ok) {
           setError(data.error ?? "Failed to load alerts.");
         } else {
-          setAlerts(data.alerts ?? []);
+          setError(null);
+          setAlerts(Array.isArray(data.alerts) ? data.alerts : []);
         }
       } catch (err: any) {
         if (!cancelled) setError(err.message);

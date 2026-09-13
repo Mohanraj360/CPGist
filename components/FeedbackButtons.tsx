@@ -9,11 +9,15 @@ export default function FeedbackButtons({ insightSummary }: { insightSummary: st
   async function send(outcome: "worked" | "didnt_work") {
     setSending(true);
     try {
-      await fetch("/api/feedback", {
+      const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ insight_summary: insightSummary, outcome }),
       });
+      if (!response.ok) {
+        throw new Error("Feedback could not be saved.");
+      }
+      setSent(outcome);
     } catch (err) {
       console.error("[v0] Failed to log feedback:", err);
       setSent(null);
