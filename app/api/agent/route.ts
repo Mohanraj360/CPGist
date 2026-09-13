@@ -103,11 +103,15 @@ export async function POST(req: NextRequest) {
 
     const fullText = result.response.text();
     const { narrative, recommendations } = splitNarrativeAndRecommendations(fullText);
+    const dataAvailable = sourceTrace.some((entry) => entry.source_tables.length > 0);
+    const dataMessage = dataAvailable ? undefined : "No connected retail data was available for this analysis.";
 
     const insights = narrative ? [narrative] : [];
     const analysisId = crypto.randomUUID();
     return NextResponse.json({
       success: true,
+      dataAvailable,
+      ...(dataMessage ? { message: dataMessage } : {}),
       analysisId,
       answer: narrative,
       executiveSummary: narrative,

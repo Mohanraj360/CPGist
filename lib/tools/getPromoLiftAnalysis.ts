@@ -6,14 +6,14 @@ export interface PromoLiftArgs {
   date_range?: { start: string; end: string };
 }
 
-// Pulls promo-week lift rows from v_promo_lift, optionally filtered by
-// brand name (joined via product name prefix — see note below) and retailer.
+// Pulls promo-week lift rows from v_promo_lift, optionally filtered by brand
+// name and retailer. The view exposes brand_name at product grain.
 export async function getPromoLiftAnalysis(args: PromoLiftArgs) {
   const sb = getSupabaseServerClient();
 
   let query = sb
     .from("v_promo_lift")
-    .select("product_id, product_name, retailer_name, channel, week_ending, promo_type, promo_week_units, trailing_nonpromo_baseline_units, pct_lift");
+    .select("product_id, product_name, brand_name, retailer_name, channel, week_ending, promo_type, promo_week_units, trailing_nonpromo_baseline_units, pct_lift");
 
   if (args.retailer) query = query.ilike("retailer_name", `%${args.retailer}%`);
   if (args.date_range) {
@@ -23,11 +23,8 @@ export async function getPromoLiftAnalysis(args: PromoLiftArgs) {
   const { data, error } = await query;
   if (error) throw error;
 
-  // Brand isn't a column on v_promo_lift (it's product-grain), so filter by
-  // product_name prefix when a brand is given — product names are seeded as
-  // "<Brand> <Subcategory>".
   const filtered = args.brand
-    ? (data ?? []).filter((r) => r.product_name?.startsWith(args.brand!))
+    ? (data ?? []).filter((r) => r.brand_name?.toLowerCase() === args.brand!.toLowerCase())
     : data ?? [];
 
   const liftValues = filtered.map((r) => r.pct_lift).filter((v): v is number => v != null);
