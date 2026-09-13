@@ -28,5 +28,6 @@ export interface ChatMessage {
   recommendations?: string[];
   chartData?: unknown;
   sourceTrace?: SourceTraceEntry[];
+  dataAvailable?: boolean;
   audience?: Audience; // set on agent messages: which framing was actually used
 }

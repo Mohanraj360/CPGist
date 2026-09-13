@@ -13,7 +13,7 @@ export interface CompetitiveSignalsArgs {
 // a second "who should care" FK — brand_relationships already owns that edge
 // (see schema.sql's Phase 7 comment for why this wasn't denormalized).
 export async function getCompetitiveSignals(args: CompetitiveSignalsArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   const { data: brandRow, error: brandErr } = await sb
     .from("brands")

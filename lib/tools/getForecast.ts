@@ -73,7 +73,7 @@ function fitLinearRegression(points: Point[]): RegressionFit {
 }
 
 export async function getForecast(args: ForecastArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   // Resolve the brand by name -> {id, category}. `ilike` with no wildcard
   // chars is a case-insensitive exact match; falls back to a substring

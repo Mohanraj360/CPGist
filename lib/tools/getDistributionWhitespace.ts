@@ -7,7 +7,7 @@ export interface DistributionWhitespaceArgs {
 }
 
 export async function getDistributionWhitespace(args: DistributionWhitespaceArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   let query = sb
     .from("v_distribution_gaps")

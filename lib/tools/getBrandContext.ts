@@ -12,7 +12,7 @@ export interface BrandContextArgs {
 // other tools call this internally (or the agent calls it directly) to add
 // cross-brand context to an otherwise single-metric answer.
 export async function getBrandContext(args: BrandContextArgs) {
-  const sb = getSupabaseServerClient();
+  const sb = await getSupabaseServerClient();
 
   const { data: brandRow, error: brandErr } = await sb
     .from("brands")

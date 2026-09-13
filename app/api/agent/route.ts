@@ -39,6 +39,8 @@ function resolveAudience(message: string, requested: unknown): Audience {
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID();
+  console.log(`[v0] agent request started ${requestId}`);
   try {
     const { message, audience } = (await req.json()) as {
       message?: string;
@@ -108,6 +110,7 @@ export async function POST(req: NextRequest) {
 
     const insights = narrative ? [narrative] : [];
     const analysisId = crypto.randomUUID();
+    console.log(`[v0] agent request completed ${requestId}`, { tools: sourceTrace.map((entry) => entry.tool), dataAvailable });
     return NextResponse.json({
       success: true,
       dataAvailable,
@@ -129,6 +132,10 @@ export async function POST(req: NextRequest) {
     console.error("[v0] Agent route error", err);
     const message = err instanceof Error ? err.message : "Unknown server error";
     const status = message === "AI provider is not configured" ? 503 : 500;
-    return NextResponse.json({ error: status === 503 ? "The analyst is temporarily unavailable." : "The analysis could not be completed." }, { status });
+    console.error(`[v0] agent request failed ${requestId}`, { error: message });
+    return NextResponse.json(
+      { error: status === 503 ? "The analyst is temporarily unavailable." : "The analysis could not be completed.", requestId },
+      { status, headers: { "x-request-id": requestId } },
+    );
   }
 }
