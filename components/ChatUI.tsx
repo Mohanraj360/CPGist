@@ -33,7 +33,8 @@ export default function ChatUI({ initialContext = null }: { initialContext?: Ana
       const res = await fetch("/api/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, audience }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || `Analysis failed (${res.status}).`);
+        const message = res.status === 429 ? "AI usage limit reached. Please try again shortly." : data.errorCode === "AI_PROVIDER_FAILED" ? "We could not retrieve the required retail data." : data.message || `Analysis failed (${res.status}).`;
+        throw new Error(message);
       }
       setMessages((prev) => [...prev, {
         id: crypto.randomUUID(),
