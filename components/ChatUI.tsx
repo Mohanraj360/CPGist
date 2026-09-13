@@ -35,7 +35,19 @@ export default function ChatUI({ initialContext = null }: { initialContext?: Ana
       if (!res.ok) {
         throw new Error(data.error || `Analysis failed (${res.status}).`);
       }
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "agent", text: data.narrative || "The analyst returned no narrative.", recommendations: data.recommendations, chartData: data.chartData, sourceTrace: data.sourceTrace, audience: data.audience }]);
+      setMessages((prev) => [...prev, {
+        id: crypto.randomUUID(),
+        role: "agent",
+        text: data.answer || data.narrative || "The analyst returned no narrative.",
+        executiveSummary: data.executiveSummary,
+        metrics: data.metrics,
+        insights: data.insights,
+        recommendations: data.recommendations,
+        followUpQuestions: data.followUpQuestions,
+        chartData: data.chartData ?? data.charts?.[0],
+        sourceTrace: data.sourceTrace,
+        audience: data.audience,
+      }]);
     } catch (err: any) {
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "agent", text: `Request failed: ${err.message}` }]);
     } finally { setLoading(false); }

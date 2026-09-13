@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getAiConfig } from "@/lib/ai-config";
 import { toolDeclarations, callTool, buildSystemPrompt, inferAudience } from "@/lib/gemini-tools";
 import type { Audience, AudienceSelection } from "@/lib/types";
 
@@ -44,27 +44,22 @@ export async function POST(req: NextRequest) {
       message?: string;
       audience?: AudienceSelection;
     };
-    if (!message || typeof message !== "string") {
+    const prompt = typeof message === "string" ? message.trim() : "";
+    if (!prompt) {
       return NextResponse.json({ error: "Missing 'message' string in request body." }, { status: 400 });
     }
 
-    const resolvedAudience = resolveAudience(message, audience);
+    const resolvedAudience = resolveAudience(prompt, audience);
 
-    const apiKey = process.env.GEMINI_API_KEY?.trim();
-    if (!apiKey) {
-      console.error("[v0] Missing GEMINI_API_KEY in the server runtime");
-      return NextResponse.json({ error: "Gemini is not configured on the server. Add GEMINI_API_KEY to the active deployment environment and redeploy." }, { status: 503 });
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+    const { client, modelName } = getAiConfig();
+    const model = client.getGenerativeModel({
+      model: modelName,
       systemInstruction: buildSystemPrompt(resolvedAudience),
       tools: [{ functionDeclarations: toolDeclarations }],
     });
 
     const chat = model.startChat();
-    let result = await chat.sendMessage(message);
+    let result = await chat.sendMessage(prompt);
 
     const sourceTrace: SourceTraceEntry[] = [];
     let chartData: unknown = null;
@@ -100,15 +95,27 @@ export async function POST(req: NextRequest) {
     const fullText = result.response.text();
     const { narrative, recommendations } = splitNarrativeAndRecommendations(fullText);
 
+    const insights = narrative ? [narrative] : [];
+    const analysisId = crypto.randomUUID();
     return NextResponse.json({
-      narrative,
+      success: true,
+      analysisId,
+      answer: narrative,
+      executiveSummary: narrative,
+      metrics: [],
+      insights,
       recommendations,
+      followUpQuestions: [],
+      charts: chartData ? [chartData] : [],
+      narrative,
       chartData,
       sourceTrace,
       audience: resolvedAudience,
     });
-  } catch (err: any) {
-    console.error("Agent route error:", err);
-    return NextResponse.json({ error: err?.message ?? "Unknown error" }, { status: 500 });
+  } catch (err: unknown) {
+    console.error("[v0] Agent route error", err);
+    const message = err instanceof Error ? err.message : "Unknown server error";
+    const status = message === "AI provider is not configured" ? 503 : 500;
+    return NextResponse.json({ error: status === 503 ? "The analyst is temporarily unavailable." : "The analysis could not be completed." }, { status });
   }
 }

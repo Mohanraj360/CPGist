@@ -275,8 +275,8 @@ several exact numbers cited in `PHASE1_NOTES.md` through `PHASE7_NOTES.md`
 - Chart images aren't embedded in the PDF export (narrative +
   recommendations + source trace only) — `app/api/export-pdf/route.tsx`
   has a comment showing where to add a captured chart PNG.
-- `gemini-1.5-pro` is hardcoded as the model in `app/api/agent/route.ts` —
-  swap freely.
+- The Gemini model is configured with `AI_MODEL` and falls back to
+  `gemini-1.5-flash` when unset.
 - No live Vercel Cron trigger has been observed firing (verified the
   route's own logic locally instead — see `PHASE8_NOTES.md`). Worth
   confirming once deployed.
