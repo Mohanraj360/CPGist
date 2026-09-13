@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Content, Part } from "@google/generative-ai";
 import { getAiConfig } from "@/lib/ai-config";
 import { toolDeclarations, callTool, buildSystemPrompt, inferAudience } from "@/lib/gemini-tools";
 import type { Audience, AudienceSelection } from "@/lib/types";
@@ -60,14 +61,15 @@ export async function POST(req: NextRequest) {
       tools: [{ functionDeclarations: toolDeclarations }],
     });
 
-    const chat = model.startChat();
-    let result = await chat.sendMessage(prompt);
+    const contents: Content[] = [{ role: "user", parts: [{ text: prompt }] }];
+    console.log("[CPGIST_AGENT] Gemini message roles:", contents.map((message) => message.role));
+    let result = await model.generateContent({ contents });
 
     const sourceTrace: SourceTraceEntry[] = [];
     let chartData: unknown = null;
 
-    // Function-calling loop: keep resolving tool calls until Gemini returns
-    // a plain text response (cap iterations to avoid runaway loops).
+    // Resolve tool calls without sending OpenAI-style function messages.
+    // Database results are explicitly labeled analysis context in a user turn.
     for (let i = 0; i < 5; i++) {
       const call = result.response.functionCalls()?.[0];
       if (!call) break;
@@ -93,14 +95,21 @@ export async function POST(req: NextRequest) {
 
       if (toolResult.ok !== false) chartData = toolResult;
 
-      result = await chat.sendMessage([
-        {
-          functionResponse: {
-            name: call.name,
-            response: toolResult,
-          },
-        },
-      ]);
+      const modelContent = result.response.candidates?.[0]?.content;
+      if (modelContent) {
+        contents.push({
+          role: "model",
+          parts: modelContent.parts as Part[],
+        });
+      }
+      contents.push({
+        role: "user",
+        parts: [{
+          text: `Data retrieved for analysis from ${call.name}:\n${JSON.stringify(toolResult)}`,
+        }],
+      });
+      console.log("[CPGIST_AGENT] Gemini message roles:", contents.map((message) => message.role));
+      result = await model.generateContent({ contents });
     }
 
     const fullText = result.response.text();
@@ -134,7 +143,12 @@ export async function POST(req: NextRequest) {
     const status = message === "AI provider is not configured" ? 503 : 500;
     console.error(`[v0] agent request failed ${requestId}`, { error: message });
     return NextResponse.json(
-      { error: status === 503 ? "The analyst is temporarily unavailable." : "The analysis could not be completed.", requestId },
+      {
+        success: false,
+        errorCode: status === 503 ? "AI_PROVIDER_NOT_CONFIGURED" : "AI_PROVIDER_FAILED",
+        message: status === 503 ? "The AI analysis service is not configured." : "The AI analysis service could not process this request.",
+        requestId,
+      },
       { status, headers: { "x-request-id": requestId } },
     );
   }
