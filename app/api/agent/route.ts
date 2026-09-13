@@ -3,6 +3,7 @@ import type { Content, Part } from "@google/generative-ai";
 import { getAiConfig } from "@/lib/ai-config";
 import { toolDeclarations, callTool, buildSystemPrompt, inferAudience } from "@/lib/gemini-tools";
 import type { Audience, AudienceSelection } from "@/lib/types";
+import { analysisCacheKey, cacheAnalysis, getCachedAnalysis, getInFlightAnalysis, setInFlightAnalysis } from "@/lib/agent-cache";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,35 @@ function splitNarrativeAndRecommendations(text: string): { narrative: string; re
 
 const VALID_AUDIENCES: Audience[] = ["category_manager", "trade", "supply_planning", "exec"];
 
+function isRateLimited(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /429|too many requests|quota exceeded|resource exhausted/i.test(message);
+}
+
+function retryAfterSeconds(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  const match = message.match(/(?:retry[- ]?after|retry in)\\s*[:=]?\\s*(\\d+(?:\\.\\d+)?)/i);
+  return match ? Math.max(1, Math.ceil(Number(match[1]))) : null;
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function generateWithBackoff(model: { generateContent: (args: { contents: Content[] }) => Promise<any> }, contents: Content[], requestId: string, callCount: { value: number }) {
+  const delays = [2000, 5000];
+  for (let attempt = 0; ; attempt += 1) {
+    callCount.value += 1;
+    try {
+      return await model.generateContent({ contents });
+    } catch (error) {
+      if (!isRateLimited(error) || attempt >= delays.length) throw error;
+      console.warn(`[CPGIST_AGENT] requestId: ${requestId} geminiStatus: rate_limited retry: ${attempt + 1}`);
+      await wait(delays[attempt]);
+    }
+  }
+}
+
 function resolveAudience(message: string, requested: unknown): Audience {
   if (typeof requested === "string" && (VALID_AUDIENCES as string[]).includes(requested)) {
     return requested as Audience;
@@ -53,6 +83,9 @@ export async function POST(req: NextRequest) {
     }
 
     const resolvedAudience = resolveAudience(prompt, audience);
+    const cacheKey = analysisCacheKey({ query: prompt, workflow: resolvedAudience });
+    const cached = getCachedAnalysis(cacheKey);
+    if (cached) return NextResponse.json({ ...cached, cached: true }, { headers: { "x-request-id": requestId } });
 
     const { client, modelName } = getAiConfig();
     const model = client.getGenerativeModel({
@@ -63,7 +96,8 @@ export async function POST(req: NextRequest) {
 
     const contents: Content[] = [{ role: "user", parts: [{ text: prompt }] }];
     console.log("[CPGIST_AGENT] Gemini message roles:", contents.map((message) => message.role));
-    let result = await model.generateContent({ contents });
+    const geminiCallCount = { value: 0 };
+    let result = await generateWithBackoff(model, contents, requestId, geminiCallCount);
 
     const sourceTrace: SourceTraceEntry[] = [];
     let chartData: unknown = null;
@@ -109,7 +143,7 @@ export async function POST(req: NextRequest) {
         }],
       });
       console.log("[CPGIST_AGENT] Gemini message roles:", contents.map((message) => message.role));
-      result = await model.generateContent({ contents });
+      result = await generateWithBackoff(model, contents, requestId, geminiCallCount);
     }
 
     const fullText = result.response.text();
@@ -119,8 +153,8 @@ export async function POST(req: NextRequest) {
 
     const insights = narrative ? [narrative] : [];
     const analysisId = crypto.randomUUID();
-    console.log(`[v0] agent request completed ${requestId}`, { tools: sourceTrace.map((entry) => entry.tool), dataAvailable });
-    return NextResponse.json({
+    console.log(`[CPGIST_AGENT] requestId: ${requestId} workflow: ${resolvedAudience} databaseStatus: ${dataAvailable ? "success" : "no_data"} geminiCallCount: ${geminiCallCount.value} geminiStatus: success responseStatus: 200`);
+    const responseBody = {
       success: true,
       dataAvailable,
       ...(dataMessage ? { message: dataMessage } : {}),
@@ -136,20 +170,24 @@ export async function POST(req: NextRequest) {
       chartData,
       sourceTrace,
       audience: resolvedAudience,
-    });
+    };
+    cacheAnalysis(cacheKey, responseBody);
+    return NextResponse.json(responseBody, { headers: { "x-request-id": requestId } });
   } catch (err: unknown) {
     console.error("[v0] Agent route error", err);
     const message = err instanceof Error ? err.message : "Unknown server error";
-    const status = message === "AI provider is not configured" ? 503 : 500;
-    console.error(`[v0] agent request failed ${requestId}`, { error: message });
+    const rateLimited = isRateLimited(err);
+    const status = message === "AI provider is not configured" ? 503 : rateLimited ? 429 : 500;
+    console.error(`[CPGIST_AGENT] requestId: ${requestId} workflow: unknown databaseStatus: unknown geminiCallCount: unknown geminiStatus: ${rateLimited ? "rate_limited" : "failed"} responseStatus: ${status}`);
     return NextResponse.json(
       {
         success: false,
-        errorCode: status === 503 ? "AI_PROVIDER_NOT_CONFIGURED" : "AI_PROVIDER_FAILED",
-        message: status === 503 ? "The AI analysis service is not configured." : "The AI analysis service could not process this request.",
+        errorCode: status === 503 ? "AI_PROVIDER_NOT_CONFIGURED" : rateLimited ? "AI_RATE_LIMITED" : "AI_PROVIDER_FAILED",
+        message: status === 503 ? "The AI analysis service is not configured." : rateLimited ? "AI analysis is temporarily unavailable due to API usage limits. Please try again shortly." : "The AI analysis service could not process this request.",
+        retryAfter: rateLimited ? retryAfterSeconds(err) : null,
         requestId,
       },
-      { status, headers: { "x-request-id": requestId } },
+      { status, headers: { "x-request-id": requestId, ...(rateLimited ? { "Retry-After": String(retryAfterSeconds(err) ?? 10) } : {}) } },
     );
   }
 }
