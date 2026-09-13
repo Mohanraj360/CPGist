@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 :root {
+  --ink-deep: #08110f;
+  --surface: #10201b;
+  --text-primary: #e8f3ee;
+  --text-secondary: #8da19a;
+  --text-tertiary: #60756d;
+  --line-dark: rgba(255,255,255,.09);
+  --accent: #9de6bc;
+  --success: #72d69e;
   --canvas: #f6f7f4;
   --ink: #16231f;
   --navy: #18332e;
@@ -24,3 +32,9 @@ button { cursor: pointer; }
 .eyebrow { color: var(--mint-strong); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .status-pill { display: inline-flex; align-items: center; border-radius: 999px; background: var(--mint-soft); color: var(--mint-strong); padding: 4px 9px; font-size: 11px; font-weight: 600; }
 ::selection { background: #cce8d8; color: var(--ink); }
+@keyframes cpgist-fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cpgist-breathe { 0%, 100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.08); opacity: 1; } }
+.animate-fade-up { animation: cpgist-fade-up 420ms cubic-bezier(.22,1,.36,1) both; }
+.cpgist-orb { animation: cpgist-breathe 2.8s ease-in-out infinite; }
+button, a, input, textarea { transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
