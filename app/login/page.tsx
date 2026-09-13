@@ -12,8 +12,6 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 // which matters for a portfolio piece someone else will actually try to run.
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = getSupabaseBrowserClient();
-
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +26,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      const supabase = getSupabaseBrowserClient();
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
