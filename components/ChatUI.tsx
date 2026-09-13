@@ -16,9 +16,12 @@ const AUDIENCE_OPTIONS: { value: AudienceSelection; label: string }[] = [
   { value: "exec", label: AUDIENCE_LABELS.exec },
 ];
 
-export default function ChatUI() {
+type AnalystContext = { source: string; label: string; prompt?: string } | null;
+
+export default function ChatUI({ initialContext = null }: { initialContext?: AnalystContext }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialContext?.prompt ?? "");
+  const [context, setContext] = useState<AnalystContext>(initialContext);
   const [loading, setLoading] = useState(false);
   const [audience, setAudience] = useState<AudienceSelection>("auto");
 
@@ -44,7 +47,7 @@ export default function ChatUI() {
     <div className="flex h-full min-h-0">
       <Sidebar onSelectTemplate={(prompt) => setInput(prompt)} />
       <section className="flex min-w-0 flex-1 flex-col bg-[var(--canvas)]">
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] bg-white px-5 py-3 sm:px-8"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-[var(--mint-strong)]" /><span className="text-xs text-[var(--muted)]">AI analyst online</span></div><div className="flex items-center gap-2"><AlertsFeed /><SignOutButton /></div></div>
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--line)] bg-white px-5 py-3 sm:px-8"><div className="flex min-w-0 items-center gap-2"><span className="size-2 shrink-0 rounded-full bg-[var(--mint-strong)]" /><span className="text-xs text-[var(--muted)]">AI analyst online</span>{context && <span className="truncate rounded-full bg-[var(--mint-soft)] px-2 py-1 text-[10px] font-medium text-[var(--mint-strong)]">{context.label}</span>}</div><div className="flex items-center gap-2"><AlertsFeed /><SignOutButton /></div></div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-8 sm:px-8">
           {messages.length === 0 ? <div className="mx-auto max-w-3xl"><p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--mint-strong)]">Good morning, analyst</p><h2 className="max-w-xl text-3xl font-semibold tracking-[-0.04em] text-[var(--ink)] sm:text-4xl">What would you like to understand about your business?</h2><p className="mt-3 max-w-xl text-sm leading-6 text-[var(--muted)]">Ask a question in plain English. CPGist will connect the dots across brands, channels, promotions, and regions.</p><div className="mt-8 grid gap-3 sm:grid-cols-3">{grouped.map(({ group, items }) => <div key={group} className="rounded-xl border border-[var(--line)] bg-white p-3"><p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{group}</p>{items.map((item) => <button key={item.label} type="button" onClick={() => setInput(item.prompt)} className="mb-1 flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-xs leading-4 text-[var(--ink)] hover:bg-[var(--canvas)]"><span>{item.label}</span><span className="text-[var(--muted)]">→</span></button>)}</div>)}</div></div> : <div className="mx-auto flex max-w-3xl flex-col gap-5">{messages.map((message) => <ChatMessageBubble key={message.id} message={message} />)}{loading && <div className="flex items-center gap-2 text-xs text-[var(--muted)]"><span className="size-2 animate-pulse rounded-full bg-[var(--mint-strong)]" />Analyzing your data…</div>}</div>}
         </div>
