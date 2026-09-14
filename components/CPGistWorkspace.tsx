@@ -1,134 +1,55 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUp, BarChart3, Bell, Command, FileText, HelpCircle, History, LayoutDashboard, Menu, Moon, Search, Settings2, Sparkles, Sun, X } from "lucide-react";
+import { ArrowUp, Bell, BookOpen, BarChart3, Check, ChevronRight, Command, Database, FileText, History, LayoutDashboard, Menu, Moon, Plus, Search, Settings2, Sparkles, Sun, X } from "lucide-react";
 import ChatUI from "@/components/ChatUI";
 
-const prompts = [
-  ["Performance", "What changed in category performance this week?"],
-  ["Distribution", "Where is distribution holding back growth?"],
-  ["Share", "Which brands are gaining share and why?"],
-  ["Promotion", "Show me the biggest promotion opportunities."],
-] as const;
-const navItems = [
-  { label: "Overview", Icon: LayoutDashboard },
-  { label: "Analyses", Icon: BarChart3 },
-  { label: "Recent", Icon: History },
-  { label: "Reports", Icon: FileText },
-  { label: "Alerts", Icon: Bell },
+type View = "Dashboard" | "Analyses" | "Workflows" | "Insights" | "Alerts" | "Reports" | "Data" | "Settings";
+type Audience = "Executive" | "Analyst" | "Operator";
+
+const nav: { label: View; icon: typeof LayoutDashboard }[] = [
+  { label: "Dashboard", icon: LayoutDashboard }, { label: "Analyses", icon: BarChart3 }, { label: "Workflows", icon: Sparkles },
+  { label: "Insights", icon: BookOpen }, { label: "Alerts", icon: Bell }, { label: "Reports", icon: FileText }, { label: "Data", icon: Database },
 ];
-type Audience = "executive" | "analyst" | "operator";
+const suggestions = ["Analyze brand performance across retailers.", "Find unusual changes in sales.", "Evaluate promotion effectiveness.", "Identify distribution opportunities."];
+const workflowCards = [{ title: "Brand performance review", detail: "Compare growth, velocity, and share across retailers." }, { title: "Promotion effectiveness", detail: "Understand lift, depth, and where campaigns softened." }, { title: "Distribution opportunity", detail: "Find whitespace across channels and regions." }, { title: "Demand forecast", detail: "Project next-period demand from connected data." }];
 
-export function CPGistWorkspace() {
+export function CPGistWorkspace({ initialView = "Dashboard" as View }: { initialView?: View }) {
+  const [view, setView] = useState<View>(initialView);
   const [query, setQuery] = useState("");
-  const [audience, setAudience] = useState<Audience>("executive");
+  const [audience, setAudience] = useState<Audience>("Executive");
+  const [running, setRunning] = useState(false);
   const [dark, setDark] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState("Overview");
-  const [submitted, setSubmitted] = useState(false);
-  const [alertCount, setAlertCount] = useState<number | null>(null);
-  const prompt = useMemo(() => prompts[0][1], []);
+  const [sidebar, setSidebar] = useState(false);
+  const [commands, setCommands] = useState(false);
+  const [alerts, setAlerts] = useState(0);
 
-  useEffect(() => {
-    fetch("/api/alerts").then((response) => response.ok ? response.json() : null).then((data) => {
-      const alerts = Array.isArray(data) ? data : Array.isArray(data?.alerts) ? data.alerts : [];
-      setAlertCount(alerts.filter((alert: { read?: boolean }) => !alert.read).length);
-    }).catch(() => setAlertCount(null));
-  }, []);
+  useEffect(() => { const saved = window.localStorage.getItem("cpgist-theme"); if (saved) setDark(saved === "dark"); }, []);
+  useEffect(() => { document.documentElement.dataset.theme = dark ? "dark" : "light"; window.localStorage.setItem("cpgist-theme", dark ? "dark" : "light"); }, [dark]);
+  useEffect(() => { fetch("/api/alerts").then((r) => r.ok ? r.json() : null).then((data) => { const rows = Array.isArray(data) ? data : data?.alerts ?? []; setAlerts(rows.filter((row: { read?: boolean }) => !row.read).length); }).catch(() => undefined); }, []);
+  useEffect(() => { const key = (event: KeyboardEvent) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setCommands(true); } if (event.key === "Escape") { setCommands(false); setSidebar(false); } }; window.addEventListener("keydown", key); return () => window.removeEventListener("keydown", key); }, []);
 
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("cpgist-theme");
-    if (savedTheme) setDark(savedTheme === "dark");
-  }, []);
+  const title = useMemo(() => view === "Dashboard" ? "Good morning, Mohanraj." : view, [view]);
+  function go(next: View) { setView(next); setSidebar(false); }
+  function assign(text = query) { if (!text.trim()) return; setQuery(text); setRunning(true); setView("Analyses"); setSidebar(false); }
+  function reset() { setQuery(""); setRunning(false); setView("Dashboard"); }
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
-    window.localStorage.setItem("cpgist-theme", dark ? "dark" : "light");
-  }, [dark]);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setCommandOpen(true);
-      }
-      if (event.key === "Escape") {
-        setCommandOpen(false);
-        setSidebarOpen(false);
-        setSettingsOpen(false);
-        setHelpOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  function startAnalysis(nextQuery = query) {
-    if (!nextQuery.trim()) return;
-    setQuery(nextQuery);
-    setSubmitted(true);
-    setActiveNav("Analyses");
-    setSidebarOpen(false);
-  }
-
-  function resetAnalysis() {
-    setQuery("");
-    setSubmitted(false);
-    setActiveNav("Overview");
-  }
-
-  function selectNav(label: string) {
-    setActiveNav(label);
-    setSidebarOpen(false);
-    if (label === "Overview") resetAnalysis();
-    if (label === "Analyses" && !submitted) startAnalysis(prompt);
-  }
-
-  return (
-    <div className="min-h-screen bg-[var(--ink-deep)] text-[var(--text-primary)]">
-      <header className="sticky top-0 z-30 border-b border-[var(--line-dark)] bg-[var(--ink-deep)]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <button aria-label="Open navigation" className="rounded-lg p-2 text-[var(--text-secondary)] hover:bg-white/[.06] lg:hidden" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
-            <button onClick={resetAnalysis} className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-[var(--accent)] text-[var(--ink-deep)]"><Sparkles size={17} /></span><span className="text-[15px] font-semibold tracking-tight">CPGist</span></button>
-            <span className="hidden h-5 w-px bg-white/10 sm:block" /><span className="hidden text-xs text-[var(--text-secondary)] sm:block">Revenue intelligence</span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button onClick={() => setCommandOpen(true)} className="hidden items-center gap-2 rounded-lg border border-[var(--line-dark)] px-3 py-2 text-xs text-[var(--text-secondary)] hover:border-[var(--accent)] md:flex"><Command size={14} /> Search <kbd className="rounded bg-white/[.07] px-1.5 py-0.5 text-[10px]">⌘K</kbd></button>
-            <button aria-label="Toggle theme" onClick={() => setDark((value) => !value)} className="rounded-lg p-2 text-[var(--text-secondary)] hover:bg-white/[.06]">{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
-            <button aria-label="Alerts" onClick={() => selectNav("Alerts")} className="relative rounded-lg p-2 text-[var(--text-secondary)] hover:bg-white/[.06]"><Bell size={18} />{alertCount ? <span className="absolute right-1 top-1 size-1.5 rounded-full bg-[var(--amber)]" /> : null}</button>
-            <button aria-label="Help" onClick={() => setHelpOpen(true)} className="rounded-lg p-2 text-[var(--text-secondary)] hover:bg-white/[.06]"><HelpCircle size={18} /></button>
-            <div className="grid size-8 place-items-center rounded-full border border-[var(--accent)]/30 bg-[var(--surface)] text-xs font-semibold text-[var(--accent)]">MR</div>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto flex max-w-[1500px]">
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-[var(--line-dark)] bg-[var(--surface)] px-4 pt-20 transition-transform duration-200 lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)] lg:translate-x-0 lg:bg-transparent lg:px-5 lg:pt-6 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="mb-7 flex items-center justify-between lg:hidden"><span className="text-sm font-semibold">Workspace</span><button onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X size={18} /></button></div>
-          <p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--text-tertiary)]">Workspace</p>
-          <nav className="space-y-1" aria-label="Workspace navigation">{navItems.map(({ label, Icon }) => <button key={label} onClick={() => selectNav(label)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${activeNav === label ? "bg-[var(--accent)]/10 font-medium text-[var(--accent)]" : "text-[var(--text-secondary)] hover:bg-white/[.05] hover:text-white"}`}><Icon size={17} />{label}{label === "Alerts" && alertCount ? <span className="ml-auto rounded-full bg-[var(--amber)]/15 px-1.5 text-[10px] text-[var(--amber)]">{alertCount}</span> : null}</button>)}</nav>
-          <div className="my-7 h-px bg-[var(--line-dark)]" /><p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--text-tertiary)]">Manage</p>
-          <button onClick={() => setSettingsOpen(true)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-white/[.05] hover:text-white"><Settings2 size={17} />Settings</button>
-          <div className="absolute bottom-6 left-5 right-5 hidden rounded-xl border border-[var(--line-dark)] bg-white/[.025] p-3 lg:block"><p className="text-xs font-medium">Connected data</p><p className="mt-1 text-[11px] text-[var(--text-secondary)]">Freshness status: <span className="text-[var(--success)]">{alertCount === null ? "Checking" : "Healthy"}</span></p></div>
-        </aside>
-        {sidebarOpen && <button className="fixed inset-0 z-30 bg-black/50 lg:hidden" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} />}
-
-        <main className="min-w-0 flex-1 px-4 pb-20 pt-8 sm:px-8 lg:px-14 lg:pt-12">
-          {!submitted ? <section className="mx-auto max-w-4xl animate-fade-up">
-            <div className="mb-12 max-w-2xl"><p className="mb-4 text-xs font-medium uppercase tracking-[.2em] text-[var(--accent)]">Good morning, Mohanraj</p><h1 className="text-3xl font-semibold tracking-[-.035em] sm:text-5xl">What should we investigate?</h1><p className="mt-4 max-w-xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">Ask a question about your business. CPGist will connect the dots across your retail data and surface the decisions that matter.</p></div>
-            <div className="mb-9 grid gap-3 sm:grid-cols-2">{prompts.map(([category, item], i) => <button key={item} onClick={() => startAnalysis(item)} className="group animate-fade-up rounded-xl border border-[var(--line-dark)] bg-[var(--surface)] p-4 text-left hover:-translate-y-1 hover:border-[var(--accent)]/40 hover:shadow-lg hover:shadow-black/20" style={{ animationDelay: `${i * 70}ms` }}><span className="mb-7 block text-[11px] font-medium uppercase tracking-[.16em] text-[var(--text-tertiary)]">{category}</span><span className="text-sm leading-5 text-[var(--text-secondary)] group-hover:text-white">{item}</span><span className="mt-4 block text-[var(--text-tertiary)] transition group-hover:translate-x-1 group-hover:text-[var(--accent)]">→</span></button>)}</div>
-            <div className="rounded-2xl border border-[var(--accent)]/20 bg-[var(--surface)] p-3 shadow-2xl shadow-black/20"><textarea value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && event.keyCode !== 229) { event.preventDefault(); startAnalysis(); } }} placeholder={prompt} rows={3} aria-label="Investigation prompt" className="w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 outline-none placeholder:text-[var(--text-tertiary)]" /><div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line-dark)] px-2 pt-3"><div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)]"><span className="size-1.5 rounded-full bg-[var(--success)]" />Ready to analyze</div><div className="flex items-center gap-3"><select value={audience} onChange={(event) => setAudience(event.target.value as Audience)} aria-label="Frame analysis for" className="rounded-lg border border-[var(--line-dark)] bg-transparent px-2 py-2 text-xs text-[var(--text-secondary)] outline-none"><option value="executive">Executive</option><option value="analyst">Analyst</option><option value="operator">Operator</option></select><button onClick={() => startAnalysis()} disabled={!query.trim()} className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[var(--ink-deep)] disabled:cursor-not-allowed disabled:opacity-40">Run analysis <ArrowUp size={14} /></button></div></div></div>
-            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-[var(--text-tertiary)]"><span>Source-traceable answers</span><span>Retail data through latest refresh</span><span>Shift + Enter for a new line</span></div>
-          </section> : <section className="mx-auto min-h-[calc(100vh-10rem)] max-w-6xl animate-fade-up"><div className="mb-6 flex flex-wrap items-start justify-between gap-4"><div><p className="mb-2 text-xs uppercase tracking-[.18em] text-[var(--accent)]">{audience} analysis</p><h1 className="max-w-3xl text-2xl font-semibold tracking-tight sm:text-4xl">{query}</h1></div><button onClick={resetAnalysis} className="rounded-lg border border-[var(--line-dark)] px-3 py-2 text-xs text-[var(--text-secondary)] hover:border-[var(--accent)]">New investigation</button></div><ChatUI initialContext={{ source: "home", label: audience, prompt: `${query}\n\nFrame the answer for a ${audience}.` }} /></section>}
-        </main>
-      </div>
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-[var(--line-dark)] bg-[var(--surface)]/95 p-2 backdrop-blur-xl lg:hidden" aria-label="Mobile navigation">{[{ label: "Home", Icon: LayoutDashboard }, { label: "Recent", Icon: History }, { label: "New", Icon: Sparkles }, { label: "Alerts", Icon: Bell }].map(({ label, Icon }) => <button key={label} onClick={() => label === "New" ? resetAnalysis() : selectNav(label === "Home" ? "Overview" : label)} className="flex flex-col items-center gap-1 rounded-lg py-1.5 text-[10px] text-[var(--text-secondary)]"><Icon size={17} />{label}</button>)}</nav>
-      {commandOpen && <div className="fixed inset-0 z-50 grid place-items-start bg-black/60 px-4 pt-24" onClick={() => setCommandOpen(false)}><div role="dialog" aria-modal="true" aria-label="Workspace commands" className="w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--line-dark)] bg-[var(--surface)] shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-center gap-3 border-b border-[var(--line-dark)] px-4 py-3"><Search size={17} className="text-[var(--text-secondary)]" /><input autoFocus placeholder="Search workspace..." className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--text-tertiary)]" onKeyDown={(event) => { if (event.key === "Escape") setCommandOpen(false); }} /><kbd className="text-[10px] text-[var(--text-tertiary)]">ESC</kbd></div><div className="p-2"><button onClick={() => { setCommandOpen(false); resetAnalysis(); }} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-white/[.06]"><Sparkles size={16} className="text-[var(--accent)]" />New investigation</button><button onClick={() => { setCommandOpen(false); selectNav("Recent"); }} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm hover:bg-white/[.06]"><History size={16} className="text-[var(--accent)]" />Open recent analyses</button></div></div></div>}
-      {(settingsOpen || helpOpen) && <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4" onClick={() => { setSettingsOpen(false); setHelpOpen(false); }}><div role="dialog" aria-modal="true" className="w-full max-w-md rounded-2xl border border-[var(--line-dark)] bg-[var(--surface)] p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">{settingsOpen ? "Workspace settings" : "How CPGist works"}</h2><button aria-label="Close dialog" onClick={() => { setSettingsOpen(false); setHelpOpen(false); }}><X size={18} /></button></div>{settingsOpen ? <div className="mt-5 space-y-4 text-sm text-[var(--text-secondary)]"><p>Audience framing: <strong className="text-white">{audience}</strong></p><p>Data freshness: <strong className="text-[var(--success)]">{alertCount === null ? "Checking" : "Healthy"}</strong></p><button onClick={() => { setSettingsOpen(false); resetAnalysis(); }} className="rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[var(--ink-deep)]">Start fresh workspace</button></div> : <div className="mt-5 space-y-3 text-sm leading-6 text-[var(--text-secondary)]"><p>Choose a workflow or describe a question. CPGist retrieves source-traceable retail data, then returns metrics, insights, and recommended actions.</p><p>Use Frame for in the analyst view to change presentation without changing the underlying facts.</p></div>}</div></div>}
-    </div>
-  );
+  return <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+    <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl"><div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center gap-3"><button className="rounded-lg p-2 lg:hidden" aria-label="Open navigation" onClick={() => setSidebar(true)}><Menu size={19}/></button><button onClick={reset} className="flex items-center gap-2"><span className="grid size-8 place-items-center rounded-lg bg-[var(--accent)] text-[var(--background)]"><Sparkles size={16}/></span><span className="font-semibold tracking-tight">CPGist</span></button><span className="hidden text-xs text-[var(--text-muted)] sm:block">AI retail analyst</span></div>
+      <div className="flex items-center gap-1"><button onClick={() => setCommands(true)} className="hidden items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-secondary)] md:flex"><Command size={14}/> Search <kbd>⌘K</kbd></button><button aria-label="Toggle theme" onClick={() => setDark(!dark)} className="rounded-lg p-2 text-[var(--text-secondary)]">{dark ? <Sun size={18}/> : <Moon size={18}/>}</button><button aria-label="Alerts" onClick={() => go("Alerts")} className="relative rounded-lg p-2 text-[var(--text-secondary)]"><Bell size={18}/>{alerts > 0 && <i className="absolute right-1 top-1 size-1.5 rounded-full bg-[var(--warning)]"/>}</button><span className="grid size-8 place-items-center rounded-full border border-[var(--accent)]/40 text-xs text-[var(--accent)]">MR</span></div>
+    </div></header>
+    <div className="mx-auto flex max-w-[1500px]">
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-[var(--border)] bg-[var(--surface)] px-4 pt-20 transition-transform lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)] lg:translate-x-0 lg:bg-transparent lg:px-5 lg:pt-7 ${sidebar ? "translate-x-0" : "-translate-x-full"}`}><div className="mb-7 flex justify-between lg:hidden"><b>Workspace</b><button aria-label="Close navigation" onClick={() => setSidebar(false)}><X size={18}/></button></div><button onClick={() => reset()} className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-3 py-3 text-xs font-semibold text-[var(--background)]"><Plus size={15}/> New analysis</button><p className="mb-3 px-2 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--text-muted)]">Workspace</p><nav className="space-y-1" aria-label="Workspace navigation">{nav.map(({ label, icon: Icon }) => <button key={label} onClick={() => go(label)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${view === label ? "bg-[var(--accent-soft)] font-medium text-[var(--accent)]" : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]"}`}><Icon size={17}/>{label}{label === "Alerts" && alerts > 0 && <span className="ml-auto text-[10px] text-[var(--warning)]">{alerts}</span>}</button>)}</nav><div className="my-7 h-px bg-[var(--border)]"/><button onClick={() => go("Settings")} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)]"><Settings2 size={17}/>Settings</button></aside>
+      {sidebar && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setSidebar(false)}/>}<main className="min-w-0 flex-1 px-4 pb-20 pt-8 sm:px-8 lg:px-14 lg:pt-12">{view === "Dashboard" ? <Dashboard assign={assign} query={query} setQuery={setQuery} audience={audience} setAudience={setAudience}/> : view === "Analyses" ? <Analysis query={query} running={running} reset={reset}/> : view === "Workflows" ? <Workflows assign={assign}/> : <Placeholder view={view} go={go} alerts={alerts}/>}</main></div>
+    {commands && <div className="fixed inset-0 z-50 bg-black/60 px-4 pt-24" onClick={() => setCommands(false)}><div className="mx-auto max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl" onClick={(e) => e.stopPropagation()}><div className="flex gap-3 border-b border-[var(--border)] p-4"><Search size={17}/><input autoFocus placeholder="Search CPGist" className="flex-1 bg-transparent text-sm outline-none" onKeyDown={(e) => e.key === "Escape" && setCommands(false)}/></div><button onClick={() => { setCommands(false); reset(); }} className="flex w-full gap-3 p-4 text-left text-sm hover:bg-[var(--surface-secondary)]"><Plus size={16}/> New analysis</button></div></div>}
+  </div>;
 }
+
+function Dashboard({ assign, query, setQuery, audience, setAudience }: { assign: (text?: string) => void; query: string; setQuery: (v: string) => void; audience: Audience; setAudience: (v: Audience) => void }) { return <section className="mx-auto max-w-5xl animate-fade-up"><div className="mb-12 max-w-2xl"><p className="eyebrow mb-4">Business intelligence workspace</p><h1 className="font-serif text-4xl tracking-[-.04em] sm:text-6xl">Good morning, Mohanraj.</h1><p className="mt-5 max-w-xl text-base leading-7 text-[var(--text-secondary)]">Here is where you assign work to your analyst and turn connected retail data into decisions.</p></div><div className="mb-10 grid gap-3 sm:grid-cols-2"><Attention label="Needs attention" value="No alert data available" detail="Connect a dataset to surface business changes."/><Attention label="Data status" value="Awaiting source" detail="Your analysis will show real metrics once data is available."/></div><div className="rounded-2xl border border-[var(--accent)]/30 bg-[var(--surface)] p-3 shadow-2xl"><div className="px-3 py-2"><span className="eyebrow">Assign analytical work</span><textarea value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); assign(); } }} rows={4} placeholder="What should your analyst investigate?" className="mt-3 w-full resize-none bg-transparent text-lg leading-8 outline-none placeholder:text-[var(--text-muted)]"/></div><div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] px-3 pt-3"><span className="text-xs text-[var(--text-muted)]">Source-traceable answers · Shift + Enter for a new line</span><div className="flex items-center gap-2"><select value={audience} onChange={(e) => setAudience(e.target.value as Audience)} aria-label="Audience" className="rounded-lg border border-[var(--border)] bg-transparent px-2 py-2 text-xs"><option>Executive</option><option>Analyst</option><option>Operator</option></select><button disabled={!query.trim()} onClick={() => assign()} className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[var(--background)] disabled:opacity-40">Run analysis <ArrowUp size={14}/></button></div></div></div><div className="mt-5 flex flex-wrap gap-2">{suggestions.map((item) => <button key={item} onClick={() => assign(item)} className="rounded-full border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-secondary)] hover:border-[var(--accent)]">{item}</button>)}</div></section> }
+function Attention({ label, value, detail }: { label: string; value: string; detail: string }) { return <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5"><span className="eyebrow">{label}</span><h2 className="mt-5 text-sm font-semibold">{value}</h2><p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">{detail}</p></div> }
+function Analysis({ query, running, reset }: { query: string; running: boolean; reset: () => void }) { return <section className="mx-auto max-w-6xl animate-fade-up"><div className="mb-8 flex flex-wrap items-start justify-between gap-4"><div><span className="eyebrow">Analysis session</span><h1 className="mt-3 max-w-3xl font-serif text-3xl sm:text-5xl">{query || "New analysis"}</h1><div className="mt-4 flex items-center gap-2 text-xs text-[var(--text-secondary)]"><span className="size-2 rounded-full bg-[var(--success)]"/>{running ? "Ready to run against connected data" : "Complete"}</div></div><button onClick={reset} className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs">New analysis</button></div><div className="grid gap-5 lg:grid-cols-[1fr_280px]"><div className="space-y-5"><article className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6"><span className="eyebrow">Executive summary</span><p className="mt-5 text-lg leading-8 text-[var(--text-secondary)]">Analysis results will appear here when a connected data source returns evidence. CPGist will keep the answer traceable to its source, filters, and calculation.</p></article><article className="rounded-2xl border border-dashed border-[var(--border)] p-8 text-center"><BarChart3 className="mx-auto text-[var(--text-muted)]" size={24}/><p className="mt-3 text-sm text-[var(--text-secondary)]">No chart data available.</p></article><ChatUI initialContext={{ source: "workspace", label: "Analysis follow-up", prompt: query }}/></div><aside className="h-fit rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5"><span className="eyebrow">Context rail</span><dl className="mt-5 space-y-4 text-sm"><dt className="text-[var(--text-muted)]">Data source</dt><dd>Connected sources</dd><dt className="text-[var(--text-muted)]">Date range</dt><dd>Not selected</dd><dt className="text-[var(--text-muted)]">Freshness</dt><dd className="text-[var(--success)]">Awaiting data</dd></dl></aside></div></section> }
+function Workflows({ assign }: { assign: (text?: string) => void }) { return <section className="mx-auto max-w-5xl"><span className="eyebrow">Workflow library</span><h1 className="mt-3 font-serif text-5xl">Assign repeatable work.</h1><p className="mt-4 max-w-xl text-[var(--text-secondary)]">Start with a focused analytical workflow, then adjust its context before running it against connected data.</p><div className="mt-10 grid gap-4 sm:grid-cols-2">{workflowCards.map((card) => <button key={card.title} onClick={() => assign(card.title)} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left hover:-translate-y-1 hover:border-[var(--accent)]"><div className="flex items-start justify-between"><Sparkles size={18} className="text-[var(--accent)]"/><ChevronRight size={17} className="text-[var(--text-muted)] group-hover:translate-x-1"/></div><h2 className="mt-8 font-semibold">{card.title}</h2><p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{card.detail}</p></button>)}</div></section> }
+function Placeholder({ view, go, alerts }: { view: View; go: (v: View) => void; alerts: number }) { const copy: Record<View, string> = { Insights: "Insights aggregate real findings from completed analyses.", Alerts: alerts ? `${alerts} unread alerts from connected data.` : "No alerts available from connected data.", Reports: "Build executive-ready reports from analysis blocks.", Data: "Review connected brands, categories, retailers, products, sales, promotions, and distribution.", Settings: "Control workspace preferences, audience framing, and data connections.", Dashboard: "", Analyses: "", Workflows: "" }; return <section className="mx-auto max-w-5xl"><span className="eyebrow">{view}</span><h1 className="mt-3 font-serif text-5xl">{view === "Alerts" ? "What requires attention?" : view === "Insights" ? "Signals worth exploring." : view}</h1><p className="mt-4 max-w-xl text-[var(--text-secondary)]">{copy[view]}</p><div className="mt-10 rounded-2xl border border-dashed border-[var(--border)] p-10 text-center"><Check className="mx-auto text-[var(--success)]" size={22}/><p className="mt-3 text-sm text-[var(--text-secondary)]">No records available yet.</p><button onClick={() => go("Dashboard")} className="mt-5 rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[var(--background)]">Assign an analysis</button></div></section> }
+
+export default CPGistWorkspace;
