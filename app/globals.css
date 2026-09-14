@@ -25,6 +25,17 @@
   --red: #bc554c;
 }
 
+[data-theme="light"] {
+  --ink-deep: #f6f7f4;
+  --surface: #ffffff;
+  --text-primary: #16231f;
+  --text-secondary: #5e7169;
+  --text-tertiary: #7f9189;
+  --line-dark: rgba(22,35,31,.12);
+  --accent: #287b55;
+  --success: #25834f;
+}
+
 * { box-sizing: border-box; }
 body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--canvas); color: var(--ink); }
 button, input, textarea, select { font: inherit; }
