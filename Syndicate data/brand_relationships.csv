@@ -1,0 +1,317 @@
+id,brand_id,related_brand_id,relationship_type,category,overlapping_regions,org_id
+1,100,102,competitor,Baby Care,India - Tier 2/3,1
+2,102,100,competitor,Baby Care,India - Tier 2/3,1
+3,100,103,competitor,Baby Care,India - Tier 2/3,1
+4,103,100,competitor,Baby Care,India - Tier 2/3,1
+5,100,105,competitor,Baby Care,India - Tier 2/3,1
+6,105,100,competitor,Baby Care,India - Tier 2/3,1
+7,100,106,competitor,Baby Care,India - Tier 2/3,1
+8,106,100,competitor,Baby Care,India - Tier 2/3,1
+9,100,108,competitor,Baby Care,India - Tier 2/3,1
+10,108,100,competitor,Baby Care,India - Tier 2/3,1
+11,101,104,competitor,Baby Care,Gulf - Qatar,1
+12,104,101,competitor,Baby Care,Gulf - Qatar,1
+13,101,109,competitor,Baby Care,Gulf - Qatar,1
+14,109,101,competitor,Baby Care,Gulf - Qatar,1
+15,102,103,competitor,Baby Care,India - Tier 2/3,1
+16,103,102,competitor,Baby Care,India - Tier 2/3,1
+17,102,104,sibling,Baby Care,,1
+18,104,102,sibling,Baby Care,,1
+19,102,105,competitor,Baby Care,India - Tier 2/3,1
+20,105,102,competitor,Baby Care,India - Tier 2/3,1
+21,102,106,competitor,Baby Care,India - Tier 2/3,1
+22,106,102,competitor,Baby Care,India - Tier 2/3,1
+23,102,108,competitor,Baby Care,India - Tier 2/3,1
+24,108,102,competitor,Baby Care,India - Tier 2/3,1
+25,103,105,competitor,Baby Care,India - Tier 2/3,1
+26,105,103,competitor,Baby Care,India - Tier 2/3,1
+27,103,106,competitor,Baby Care,India - Tier 2/3,1
+28,106,103,competitor,Baby Care,India - Tier 2/3,1
+29,103,108,competitor,Baby Care,India - Tier 2/3,1
+30,108,103,competitor,Baby Care,India - Tier 2/3,1
+31,104,105,competitor,Baby Care,SEA - Indonesia,1
+32,105,104,competitor,Baby Care,SEA - Indonesia,1
+33,104,107,competitor,Baby Care,SEA - Indonesia,1
+34,107,104,competitor,Baby Care,SEA - Indonesia,1
+35,104,109,competitor,Baby Care,Gulf - Qatar,1
+36,109,104,competitor,Baby Care,Gulf - Qatar,1
+37,105,106,competitor,Baby Care,India - Tier 2/3,1
+38,106,105,competitor,Baby Care,India - Tier 2/3,1
+39,105,107,competitor,Baby Care,SEA - Indonesia,1
+40,107,105,competitor,Baby Care,SEA - Indonesia,1
+41,105,108,competitor,Baby Care,India - Tier 2/3,1
+42,108,105,competitor,Baby Care,India - Tier 2/3,1
+43,106,108,competitor,Baby Care,Gulf - Saudi|India - Tier 2/3,1
+44,108,106,competitor,Baby Care,Gulf - Saudi|India - Tier 2/3,1
+45,109,110,competitor,Baby Care,North America,1
+46,110,109,competitor,Baby Care,North America,1
+47,45,46,competitor,Beverages,Gulf - Saudi,1
+48,46,45,competitor,Beverages,Gulf - Saudi,1
+49,45,47,competitor,Beverages,Gulf - Saudi,1
+50,47,45,competitor,Beverages,Gulf - Saudi,1
+51,45,53,competitor,Beverages,Gulf - Saudi,1
+52,53,45,competitor,Beverages,Gulf - Saudi,1
+53,45,54,competitor,Beverages,Gulf - Saudi,1
+54,54,45,competitor,Beverages,Gulf - Saudi,1
+55,46,47,competitor,Beverages,Gulf - Saudi,1
+56,47,46,competitor,Beverages,Gulf - Saudi,1
+57,46,51,competitor,Beverages,North America,1
+58,51,46,competitor,Beverages,North America,1
+59,46,53,competitor,Beverages,Gulf - Saudi,1
+60,53,46,competitor,Beverages,Gulf - Saudi,1
+61,46,54,competitor,Beverages,Gulf - Saudi,1
+62,54,46,competitor,Beverages,Gulf - Saudi,1
+63,47,49,competitor,Beverages,India - Tier 2/3,1
+64,49,47,competitor,Beverages,India - Tier 2/3,1
+65,47,53,competitor,Beverages,Gulf - Saudi,1
+66,53,47,competitor,Beverages,Gulf - Saudi,1
+67,47,54,competitor,Beverages,Gulf - Saudi|India - Tier 2/3,1
+68,54,47,competitor,Beverages,Gulf - Saudi|India - Tier 2/3,1
+69,48,52,competitor,Beverages,Gulf - Qatar,1
+70,52,48,competitor,Beverages,Gulf - Qatar,1
+71,48,53,competitor,Beverages,Gulf - Qatar,1
+72,53,48,competitor,Beverages,Gulf - Qatar,1
+73,49,54,competitor,Beverages,India - Tier 2/3,1
+74,54,49,competitor,Beverages,India - Tier 2/3,1
+75,50,55,competitor,Beverages,SEA - Indonesia,1
+76,55,50,competitor,Beverages,SEA - Indonesia,1
+77,52,53,competitor,Beverages,Gulf - Qatar,1
+78,53,52,competitor,Beverages,Gulf - Qatar,1
+79,53,54,competitor,Beverages,Gulf - Saudi,1
+80,54,53,competitor,Beverages,Gulf - Saudi,1
+81,89,94,competitor,Breakfast & Cereal,India - Tier 2/3,1
+82,94,89,competitor,Breakfast & Cereal,India - Tier 2/3,1
+83,89,96,competitor,Breakfast & Cereal,India - Tier 2/3,1
+84,96,89,competitor,Breakfast & Cereal,India - Tier 2/3,1
+85,89,98,competitor,Breakfast & Cereal,India - Tier 2/3,1
+86,98,89,competitor,Breakfast & Cereal,India - Tier 2/3,1
+87,90,91,competitor,Breakfast & Cereal,SEA - Malaysia,1
+88,91,90,competitor,Breakfast & Cereal,SEA - Malaysia,1
+89,90,93,competitor,Breakfast & Cereal,Gulf - UAE,1
+90,93,90,competitor,Breakfast & Cereal,Gulf - UAE,1
+91,90,97,competitor,Breakfast & Cereal,SEA - Malaysia,1
+92,97,90,competitor,Breakfast & Cereal,SEA - Malaysia,1
+93,90,99,competitor,Breakfast & Cereal,Gulf - UAE|SEA - Malaysia,1
+94,99,90,competitor,Breakfast & Cereal,Gulf - UAE|SEA - Malaysia,1
+95,91,95,competitor,Breakfast & Cereal,Gulf - Saudi,1
+96,95,91,competitor,Breakfast & Cereal,Gulf - Saudi,1
+97,91,97,competitor,Breakfast & Cereal,SEA - Malaysia,1
+98,97,91,competitor,Breakfast & Cereal,SEA - Malaysia,1
+99,91,98,competitor,Breakfast & Cereal,Gulf - Saudi,1
+100,98,91,competitor,Breakfast & Cereal,Gulf - Saudi,1
+101,91,99,competitor,Breakfast & Cereal,SEA - Malaysia,1
+102,99,91,competitor,Breakfast & Cereal,SEA - Malaysia,1
+103,92,93,competitor,Breakfast & Cereal,SEA - Philippines,1
+104,93,92,competitor,Breakfast & Cereal,SEA - Philippines,1
+105,93,99,competitor,Breakfast & Cereal,Gulf - UAE,1
+106,99,93,competitor,Breakfast & Cereal,Gulf - UAE,1
+107,94,96,competitor,Breakfast & Cereal,India - Tier 2/3,1
+108,96,94,competitor,Breakfast & Cereal,India - Tier 2/3,1
+109,94,98,competitor,Breakfast & Cereal,India - Tier 2/3,1
+110,98,94,competitor,Breakfast & Cereal,India - Tier 2/3,1
+111,95,98,competitor,Breakfast & Cereal,Gulf - Saudi,1
+112,98,95,competitor,Breakfast & Cereal,Gulf - Saudi,1
+113,96,98,competitor,Breakfast & Cereal,India - Tier 2/3,1
+114,98,96,competitor,Breakfast & Cereal,India - Tier 2/3,1
+115,97,99,competitor,Breakfast & Cereal,SEA - Malaysia,1
+116,99,97,competitor,Breakfast & Cereal,SEA - Malaysia,1
+117,78,81,sibling,Confectionery,,1
+118,81,78,sibling,Confectionery,,1
+119,78,84,competitor,Confectionery,SEA - Indonesia,1
+120,84,78,competitor,Confectionery,SEA - Indonesia,1
+121,78,88,competitor,Confectionery,SEA - Indonesia,1
+122,88,78,competitor,Confectionery,SEA - Indonesia,1
+123,79,80,competitor,Confectionery,India - Tier 2/3,1
+124,80,79,competitor,Confectionery,India - Tier 2/3,1
+125,79,82,competitor,Confectionery,India - Tier 2/3,1
+126,82,79,competitor,Confectionery,India - Tier 2/3,1
+127,79,83,competitor,Confectionery,India - Tier 2/3,1
+128,83,79,competitor,Confectionery,India - Tier 2/3,1
+129,79,85,competitor,Confectionery,India - Tier 2/3,1
+130,85,79,competitor,Confectionery,India - Tier 2/3,1
+131,80,82,competitor,Confectionery,India - Tier 2/3|North America,1
+132,82,80,competitor,Confectionery,India - Tier 2/3|North America,1
+133,80,83,competitor,Confectionery,India - Tier 2/3,1
+134,83,80,competitor,Confectionery,India - Tier 2/3,1
+135,80,85,competitor,Confectionery,India - Tier 2/3,1
+136,85,80,competitor,Confectionery,India - Tier 2/3,1
+137,80,87,competitor,Confectionery,North America,1
+138,87,80,competitor,Confectionery,North America,1
+139,82,83,competitor,Confectionery,India - Tier 2/3,1
+140,83,82,competitor,Confectionery,India - Tier 2/3,1
+141,82,85,competitor,Confectionery,India - Tier 2/3,1
+142,85,82,competitor,Confectionery,India - Tier 2/3,1
+143,82,87,competitor,Confectionery,North America,1
+144,87,82,competitor,Confectionery,North America,1
+145,83,85,competitor,Confectionery,India - Tier 2/3,1
+146,85,83,competitor,Confectionery,India - Tier 2/3,1
+147,84,88,competitor,Confectionery,SEA - Indonesia,1
+148,88,84,competitor,Confectionery,SEA - Indonesia,1
+149,67,68,competitor,Dairy,SEA - Indonesia,1
+150,68,67,competitor,Dairy,SEA - Indonesia,1
+151,67,72,sibling,Dairy,,1
+152,72,67,sibling,Dairy,,1
+153,67,73,competitor,Dairy,SEA - Indonesia,1
+154,73,67,competitor,Dairy,SEA - Indonesia,1
+155,68,73,competitor,Dairy,SEA - Indonesia,1
+156,73,68,competitor,Dairy,SEA - Indonesia,1
+157,70,72,competitor,Dairy,India - Tier 2/3,1
+158,72,70,competitor,Dairy,India - Tier 2/3,1
+159,70,74,competitor,Dairy,India - Tier 2/3,1
+160,74,70,competitor,Dairy,India - Tier 2/3,1
+161,70,75,competitor,Dairy,India - Tier 2/3,1
+162,75,70,competitor,Dairy,India - Tier 2/3,1
+163,70,76,competitor,Dairy,India - Tier 2/3,1
+164,76,70,competitor,Dairy,India - Tier 2/3,1
+165,70,77,competitor,Dairy,Gulf - Saudi,1
+166,77,70,competitor,Dairy,Gulf - Saudi,1
+167,71,73,competitor,Dairy,North America,1
+168,73,71,competitor,Dairy,North America,1
+169,71,76,competitor,Dairy,North America,1
+170,76,71,competitor,Dairy,North America,1
+171,72,74,competitor,Dairy,India - Tier 2/3,1
+172,74,72,competitor,Dairy,India - Tier 2/3,1
+173,72,75,competitor,Dairy,India - Tier 2/3,1
+174,75,72,competitor,Dairy,India - Tier 2/3,1
+175,72,76,competitor,Dairy,India - Tier 2/3,1
+176,76,72,competitor,Dairy,India - Tier 2/3,1
+177,73,76,competitor,Dairy,North America,1
+178,76,73,competitor,Dairy,North America,1
+179,74,75,competitor,Dairy,India - Tier 2/3,1
+180,75,74,competitor,Dairy,India - Tier 2/3,1
+181,74,76,competitor,Dairy,India - Tier 2/3,1
+182,76,74,competitor,Dairy,India - Tier 2/3,1
+183,75,76,competitor,Dairy,India - Tier 2/3,1
+184,76,75,competitor,Dairy,India - Tier 2/3,1
+185,56,57,competitor,Home Care,India - Tier 2/3,1
+186,57,56,competitor,Home Care,India - Tier 2/3,1
+187,56,66,competitor,Home Care,India - Tier 2/3,1
+188,66,56,competitor,Home Care,India - Tier 2/3,1
+189,57,66,competitor,Home Care,India - Tier 2/3,1
+190,66,57,competitor,Home Care,India - Tier 2/3,1
+191,58,59,competitor,Home Care,Gulf - UAE,1
+192,59,58,competitor,Home Care,Gulf - UAE,1
+193,58,60,competitor,Home Care,Gulf - UAE,1
+194,60,58,competitor,Home Care,Gulf - UAE,1
+195,58,64,competitor,Home Care,SEA - Indonesia,1
+196,64,58,competitor,Home Care,SEA - Indonesia,1
+197,58,66,competitor,Home Care,SEA - Indonesia,1
+198,66,58,competitor,Home Care,SEA - Indonesia,1
+199,59,60,competitor,Home Care,Gulf - UAE,1
+200,60,59,competitor,Home Care,Gulf - UAE,1
+201,59,61,competitor,Home Care,India - Metro,1
+202,61,59,competitor,Home Care,India - Metro,1
+203,62,63,competitor,Home Care,Gulf - Saudi|North America,1
+204,63,62,competitor,Home Care,Gulf - Saudi|North America,1
+205,62,64,competitor,Home Care,North America,1
+206,64,62,competitor,Home Care,North America,1
+207,62,65,competitor,Home Care,North America,1
+208,65,62,competitor,Home Care,North America,1
+209,63,64,competitor,Home Care,North America,1
+210,64,63,competitor,Home Care,North America,1
+211,63,65,competitor,Home Care,North America,1
+212,65,63,competitor,Home Care,North America,1
+213,64,65,competitor,Home Care,North America,1
+214,65,64,competitor,Home Care,North America,1
+215,64,66,competitor,Home Care,SEA - Indonesia,1
+216,66,64,competitor,Home Care,SEA - Indonesia,1
+217,34,39,competitor,Packaged Foods,SEA - Malaysia,1
+218,39,34,competitor,Packaged Foods,SEA - Malaysia,1
+219,35,36,sibling,Packaged Foods,India - Tier 2/3,1
+220,36,35,sibling,Packaged Foods,India - Tier 2/3,1
+221,35,41,competitor,Packaged Foods,North America,1
+222,41,35,competitor,Packaged Foods,North America,1
+223,35,42,competitor,Packaged Foods,India - Tier 2/3,1
+224,42,35,competitor,Packaged Foods,India - Tier 2/3,1
+225,35,43,competitor,Packaged Foods,India - Tier 2/3,1
+226,43,35,competitor,Packaged Foods,India - Tier 2/3,1
+227,35,44,competitor,Packaged Foods,India - Tier 2/3,1
+228,44,35,competitor,Packaged Foods,India - Tier 2/3,1
+229,36,42,competitor,Packaged Foods,India - Tier 2/3,1
+230,42,36,competitor,Packaged Foods,India - Tier 2/3,1
+231,36,43,competitor,Packaged Foods,India - Tier 2/3,1
+232,43,36,competitor,Packaged Foods,India - Tier 2/3,1
+233,36,44,competitor,Packaged Foods,India - Tier 2/3,1
+234,44,36,competitor,Packaged Foods,India - Tier 2/3,1
+235,37,38,competitor,Packaged Foods,Gulf - Saudi,1
+236,38,37,competitor,Packaged Foods,Gulf - Saudi,1
+237,38,42,competitor,Packaged Foods,SEA - Philippines,1
+238,42,38,competitor,Packaged Foods,SEA - Philippines,1
+239,40,44,competitor,Packaged Foods,Gulf - UAE,1
+240,44,40,competitor,Packaged Foods,Gulf - UAE,1
+241,42,43,competitor,Packaged Foods,India - Tier 2/3,1
+242,43,42,competitor,Packaged Foods,India - Tier 2/3,1
+243,42,44,competitor,Packaged Foods,India - Tier 2/3,1
+244,44,42,competitor,Packaged Foods,India - Tier 2/3,1
+245,43,44,competitor,Packaged Foods,India - Tier 2/3,1
+246,44,43,competitor,Packaged Foods,India - Tier 2/3,1
+247,23,29,competitor,Personal Care,India - Metro,1
+248,29,23,competitor,Personal Care,India - Metro,1
+249,25,28,competitor,Personal Care,SEA - Malaysia,1
+250,28,25,competitor,Personal Care,SEA - Malaysia,1
+251,25,30,competitor,Personal Care,SEA - Malaysia,1
+252,30,25,competitor,Personal Care,SEA - Malaysia,1
+253,26,32,competitor,Personal Care,India - Tier 2/3,1
+254,32,26,competitor,Personal Care,India - Tier 2/3,1
+255,26,33,competitor,Personal Care,India - Tier 2/3,1
+256,33,26,competitor,Personal Care,India - Tier 2/3,1
+257,28,30,competitor,Personal Care,North America|SEA - Malaysia,1
+258,30,28,competitor,Personal Care,North America|SEA - Malaysia,1
+259,31,33,competitor,Personal Care,Gulf - Saudi,1
+260,33,31,competitor,Personal Care,Gulf - Saudi,1
+261,32,33,competitor,Personal Care,India - Tier 2/3,1
+262,33,32,competitor,Personal Care,India - Tier 2/3,1
+263,1,8,competitor,Salty Snacks,India - Tier 2/3,1
+264,8,1,competitor,Salty Snacks,India - Tier 2/3,1
+265,1,11,competitor,Salty Snacks,India - Tier 2/3,1
+266,11,1,competitor,Salty Snacks,India - Tier 2/3,1
+267,2,3,competitor,Salty Snacks,Gulf - Saudi,1
+268,3,2,competitor,Salty Snacks,Gulf - Saudi,1
+269,2,6,competitor,Salty Snacks,Gulf - Saudi,1
+270,6,2,competitor,Salty Snacks,Gulf - Saudi,1
+271,2,10,competitor,Salty Snacks,Gulf - Saudi,1
+272,10,2,competitor,Salty Snacks,Gulf - Saudi,1
+273,3,6,competitor,Salty Snacks,Gulf - Saudi|North America,1
+274,6,3,competitor,Salty Snacks,Gulf - Saudi|North America,1
+275,3,10,competitor,Salty Snacks,Gulf - Saudi,1
+276,10,3,competitor,Salty Snacks,Gulf - Saudi,1
+277,3,11,competitor,Salty Snacks,North America,1
+278,11,3,competitor,Salty Snacks,North America,1
+279,6,10,competitor,Salty Snacks,Gulf - Saudi,1
+280,10,6,competitor,Salty Snacks,Gulf - Saudi,1
+281,6,11,competitor,Salty Snacks,North America,1
+282,11,6,competitor,Salty Snacks,North America,1
+283,7,9,competitor,Salty Snacks,Gulf - UAE,1
+284,9,7,competitor,Salty Snacks,Gulf - UAE,1
+285,8,11,competitor,Salty Snacks,India - Tier 2/3,1
+286,11,8,competitor,Salty Snacks,India - Tier 2/3,1
+287,12,17,competitor,Sparkling Water,India - Metro,1
+288,17,12,competitor,Sparkling Water,India - Metro,1
+289,12,19,competitor,Sparkling Water,India - Tier 2/3,1
+290,19,12,competitor,Sparkling Water,India - Tier 2/3,1
+291,12,20,competitor,Sparkling Water,India - Metro,1
+292,20,12,competitor,Sparkling Water,India - Metro,1
+293,12,21,competitor,Sparkling Water,India - Metro,1
+294,21,12,competitor,Sparkling Water,India - Metro,1
+295,13,16,competitor,Sparkling Water,SEA - Philippines,1
+296,16,13,competitor,Sparkling Water,SEA - Philippines,1
+297,13,21,competitor,Sparkling Water,SEA - Malaysia,1
+298,21,13,competitor,Sparkling Water,SEA - Malaysia,1
+299,14,18,competitor,Sparkling Water,North America,1
+300,18,14,competitor,Sparkling Water,North America,1
+301,14,19,competitor,Sparkling Water,North America,1
+302,19,14,competitor,Sparkling Water,North America,1
+303,15,18,competitor,Sparkling Water,Gulf - Saudi,1
+304,18,15,competitor,Sparkling Water,Gulf - Saudi,1
+305,15,22,competitor,Sparkling Water,Gulf - Saudi,1
+306,22,15,competitor,Sparkling Water,Gulf - Saudi,1
+307,17,20,competitor,Sparkling Water,India - Metro,1
+308,20,17,competitor,Sparkling Water,India - Metro,1
+309,17,21,competitor,Sparkling Water,India - Metro,1
+310,21,17,competitor,Sparkling Water,India - Metro,1
+311,18,19,competitor,Sparkling Water,North America,1
+312,19,18,competitor,Sparkling Water,North America,1
+313,18,22,competitor,Sparkling Water,Gulf - Saudi,1
+314,22,18,competitor,Sparkling Water,Gulf - Saudi,1
+315,20,21,competitor,Sparkling Water,India - Metro,1
+316,21,20,competitor,Sparkling Water,India - Metro,1

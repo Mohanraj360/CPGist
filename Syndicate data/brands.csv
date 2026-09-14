@@ -1,0 +1,111 @@
+id,name,category,parent_company,home_regions
+1,True Snacks,Salty Snacks,,India - Tier 2/3
+2,Bold Snacks,Salty Snacks,,Gulf - Saudi|India - Metro
+3,Prime Snacks,Salty Snacks,,Gulf - Saudi|North America
+4,Blue Bites,Salty Snacks,,SEA - Malaysia
+5,Urban Crisps,Salty Snacks,,Gulf - Qatar
+6,Coastal Bites,Salty Snacks,,Gulf - Saudi|North America
+7,Urban Bites,Salty Snacks,Solace Holdings,Gulf - UAE|SEA - Indonesia
+8,Meadow Crisps,Salty Snacks,,India - Tier 2/3
+9,Spring Crisps,Salty Snacks,,Gulf - UAE
+10,Silver Chips,Salty Snacks,,Gulf - Saudi
+11,Silver Snacks,Salty Snacks,Northbridge Holdings,India - Tier 2/3|North America
+12,True Water Co,Sparkling Water,,India - Metro|India - Tier 2/3
+13,Urban Bubbles,Sparkling Water,Kestrel Holdings,SEA - Malaysia|SEA - Philippines
+14,Golden Bubbles,Sparkling Water,Ashford Holdings,North America
+15,Blue Springs,Sparkling Water,,Gulf - Saudi
+16,Sunrise Water Co,Sparkling Water,Highfield Holdings,SEA - Indonesia|SEA - Philippines
+17,Nomad Bubbles,Sparkling Water,,India - Metro
+18,Royal Fizz,Sparkling Water,,Gulf - Saudi|North America
+19,Fresh Fizz,Sparkling Water,,India - Tier 2/3|North America
+20,Heritage Springs,Sparkling Water,,India - Metro
+21,Golden Fizz,Sparkling Water,Marrow Holdings,India - Metro|SEA - Malaysia
+22,Crunch Fizz,Sparkling Water,Talcott Holdings,Gulf - Saudi|Gulf - UAE
+23,Golden Skin,Personal Care,Meridian Holdings,India - Metro
+24,Spring Care,Personal Care,,Gulf - Qatar|Gulf - UAE
+25,Royal Skin,Personal Care,,SEA - Malaysia
+26,Prime Care,Personal Care,,India - Tier 2/3
+27,Golden Glow,Personal Care,,SEA - Indonesia
+28,Spring Skin,Personal Care,Fernway Holdings,North America|SEA - Malaysia
+29,Golden Essentials,Personal Care,,India - Metro
+30,Cloud Essentials,Personal Care,,North America|SEA - Malaysia
+31,Everyday Glow,Personal Care,Bellcrest Holdings,Gulf - Saudi
+32,Cloud Skin,Personal Care,,India - Tier 2/3
+33,Cloud Glow,Personal Care,,Gulf - Saudi|India - Tier 2/3
+34,Bold Kitchen,Packaged Foods,,SEA - Indonesia|SEA - Malaysia
+35,Silver Table,Packaged Foods,Solace Holdings,India - Tier 2/3|North America
+36,Cloud Table,Packaged Foods,Solace Holdings,Gulf - Qatar|India - Tier 2/3
+37,Heritage Kitchen,Packaged Foods,Marrow Holdings,Gulf - Saudi
+38,Urban Pantry,Packaged Foods,Cardinal Holdings,Gulf - Saudi|SEA - Philippines
+39,Blue Kitchen,Packaged Foods,Ashford Holdings,SEA - Malaysia
+40,Meadow Pantry,Packaged Foods,Larkspur Holdings,Gulf - UAE
+41,Royal Kitchen,Packaged Foods,,North America
+42,Urban Kitchen,Packaged Foods,,India - Tier 2/3|SEA - Philippines
+43,Coastal Table,Packaged Foods,,India - Metro|India - Tier 2/3
+44,Spring Pantry,Packaged Foods,,Gulf - UAE|India - Tier 2/3
+45,Pure Drinks,Beverages,,Gulf - Saudi
+46,Fresh Refresh,Beverages,,Gulf - Saudi|North America
+47,Sunrise Refresh,Beverages,,Gulf - Saudi|India - Tier 2/3
+48,Silver Beverages,Beverages,,Gulf - Qatar
+49,Meadow Beverages,Beverages,,India - Tier 2/3
+50,Crunch Drinks,Beverages,,SEA - Indonesia|SEA - Philippines
+51,Coastal Drinks,Beverages,,North America|SEA - Malaysia
+52,Spring Sip,Beverages,,Gulf - Qatar
+53,Cloud Sip,Beverages,Wrenfield Holdings,Gulf - Qatar|Gulf - Saudi
+54,Nomad Drinks,Beverages,,Gulf - Saudi|India - Tier 2/3
+55,Vivid Sip,Beverages,,India - Metro|SEA - Indonesia
+56,Golden Shine,Home Care,Alderbrook Holdings,India - Tier 2/3
+57,Cloud Shine,Home Care,,India - Tier 2/3|SEA - Philippines
+58,Coastal Clean,Home Care,,Gulf - UAE|SEA - Indonesia
+59,Pure Shine,Home Care,,Gulf - UAE|India - Metro
+60,True Shine,Home Care,,Gulf - UAE
+61,Crunch Household,Home Care,,India - Metro
+62,Royal Household,Home Care,Union Point Holdings,Gulf - Saudi|North America
+63,Silver Household,Home Care,Marrow Holdings,Gulf - Saudi|North America
+64,Blue Shine,Home Care,,North America|SEA - Indonesia
+65,Urban Clean,Home Care,,North America
+66,Golden Household,Home Care,Wrenfield Holdings,India - Tier 2/3|SEA - Indonesia
+67,Golden Milk Co,Dairy,Bellcrest Holdings,SEA - Indonesia
+68,Cloud Dairy,Dairy,Solace Holdings,SEA - Indonesia
+69,Everyday Milk Co,Dairy,,SEA - Malaysia
+70,Vivid Milk Co,Dairy,,Gulf - Saudi|India - Tier 2/3
+71,Golden Farms,Dairy,,North America|SEA - Philippines
+72,Nomad Milk Co,Dairy,Bellcrest Holdings,India - Tier 2/3
+73,Blue Milk Co,Dairy,,North America|SEA - Indonesia
+74,Sunrise Milk Co,Dairy,,India - Tier 2/3
+75,Vivid Dairy,Dairy,,Gulf - UAE|India - Tier 2/3
+76,Royal Farms,Dairy,Kestrel Holdings,India - Tier 2/3|North America
+77,Urban Creamery,Dairy,,Gulf - Qatar|Gulf - Saudi
+78,Prime Confections,Confectionery,Union Point Holdings,India - Metro|SEA - Indonesia
+79,Coastal Candy Co,Confectionery,,India - Tier 2/3
+80,Nomad Candy Co,Confectionery,Talcott Holdings,India - Tier 2/3|North America
+81,Prime Candy Co,Confectionery,Union Point Holdings,Gulf - Qatar
+82,Meadow Treats,Confectionery,,India - Tier 2/3|North America
+83,Fresh Treats,Confectionery,,Gulf - Saudi|India - Tier 2/3
+84,Everyday Treats,Confectionery,,SEA - Indonesia
+85,Heritage Treats,Confectionery,,India - Tier 2/3
+86,True Candy Co,Confectionery,Meridian Holdings,SEA - Philippines
+87,Pure Sweets,Confectionery,Northbridge Holdings,North America
+88,Pure Treats,Confectionery,Larkspur Holdings,Gulf - UAE|SEA - Indonesia
+89,Nomad Mornings,Breakfast & Cereal,Highfield Holdings,India - Tier 2/3|North America
+90,Prime Grains,Breakfast & Cereal,Bellcrest Holdings,Gulf - UAE|SEA - Malaysia
+91,Coastal Cereal Co,Breakfast & Cereal,Meridian Holdings,Gulf - Saudi|SEA - Malaysia
+92,Cloud Grains,Breakfast & Cereal,,SEA - Philippines
+93,Urban Mornings,Breakfast & Cereal,,Gulf - UAE|SEA - Philippines
+94,Crunch Cereal Co,Breakfast & Cereal,,India - Tier 2/3|SEA - Indonesia
+95,Cloud Mornings,Breakfast & Cereal,Solace Holdings,Gulf - Saudi
+96,Meadow Breakfast Co,Breakfast & Cereal,Union Point Holdings,India - Tier 2/3
+97,Royal Breakfast Co,Breakfast & Cereal,,SEA - Malaysia
+98,Coastal Mornings,Breakfast & Cereal,,Gulf - Saudi|India - Tier 2/3
+99,Fresh Cereal Co,Breakfast & Cereal,,Gulf - UAE|SEA - Malaysia
+100,Fresh Tiny Care,Baby Care,,India - Tier 2/3
+101,Everyday Tiny Care,Baby Care,Meridian Holdings,Gulf - Qatar
+102,Coastal Little Ones,Baby Care,Solace Holdings,India - Tier 2/3
+103,Coastal Baby Essentials,Baby Care,,India - Tier 2/3
+104,Meadow Baby Co,Baby Care,Solace Holdings,Gulf - Qatar|SEA - Indonesia
+105,Silver Baby Essentials,Baby Care,,India - Tier 2/3|SEA - Indonesia
+106,Vivid Little Ones,Baby Care,Ashford Holdings,Gulf - Saudi|India - Tier 2/3
+107,Spring Tiny Care,Baby Care,,SEA - Indonesia
+108,Crunch Baby Co,Baby Care,Union Point Holdings,Gulf - Saudi|India - Tier 2/3
+109,Silver Little Ones,Baby Care,,Gulf - Qatar|North America
+110,Meadow Tiny Care,Baby Care,,India - Metro|North America
