@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cpg-decision-hub.preview.emergentagent.com/sitemap.xml

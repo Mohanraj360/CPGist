@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project_name": "CPGist",
+  "tagline": "From CPG data to confident decisions.",
+  "positioning": "AI-Powered CPG Intelligence — Turn complex sales, retail, pricing, distribution, and promotion data into clear insights, evidence-aware analysis, and actionable next steps.",
+  "brand_identity": {
+    "archetype": "Specialist CPG Intelligence + Modern Enterprise SaaS + Swiss Precision",
+    "emotional_tone": "Authoritative, analytical, transparent, restrained, deeply credible. No AI hype, no fabricated vanity metrics, honest product mockups and clear evidence-aware framing.",
+    "logo_asset_url": "https://customer-assets-lqy194kg.emergentagent.net/job_cb2c9808-e2c1-4c98-a342-00965babd193/artifacts/a073879629cdfe90_5e716206-572c-4d67-a5eb-38a638dd168e.png",
+    "logo_styling": "Circular badge with orange 'C' & bar-chart motif + purple/orange gradient ring. Treat as the single intentional warm accent anchor across header, footer, and auth forms. Wrap in crisp white or midnight-navy container with subtle border."
+  },
+  "colors": {
+    "palette_tokens": {
+      "midnight_navy": "#101A36",
+      "primary_navy": "#1E2761",
+      "secondary_navy": "#26307A",
+      "executive_blue": "#3B458F",
+      "ice_blue": "#CADCFC",
+      "light_blue": "#E7ECFB",
+      "accent_blue": "#AFC0EE",
+      "neutral_text": "#667085",
+      "background_light": "#F7F9FC",
+      "white": "#FFFFFF",
+      "border_subtle": "#E2E8F0",
+      "border_navy": "rgba(202, 220, 252, 0.18)",
+      "accent_amber": "#F97316",
+      "success_emerald": "#059669",
+      "warning_amber": "#D97706",
+      "error_rose": "#E11D48"
+    },
+    "accent": "#1E2761",
+    "on_accent": "#FFFFFF",
+    "surfaces": [
+      {
+        "name": "page",
+        "kind": "solid",
+        "bg": "#F7F9FC",
+        "on_bg": "#101A36",
+        "on_bg_muted": "#475467",
+        "roles": {
+          "link": "#1E2761",
+          "error": "#B91C1C",
+          "success": "#047857",
+          "warning": "#B45309"
+        }
+      },
+      {
+        "name": "white_card",
+        "kind": "solid",
+        "bg": "#FFFFFF",
+        "on_bg": "#101A36",
+        "on_bg_muted": "#475467",
+        "roles": {
+          "link": "#1E2761",
+          "badge_bg": "#E7ECFB",
+          "badge_text": "#1E2761",
+          "border": "#E2E8F0"
+        }
+      },
+      {
+        "name": "navy_hero_and_footer",
+        "kind": "solid",
+        "bg": "#101A36",
+        "on_bg": "#FFFFFF",
+        "on_bg_muted": "#CADCFC",
+        "roles": {
+          "link": "#CADCFC",
+          "accent_chip_bg": "rgba(202, 220, 252, 0.12)",
+          "accent_chip_text": "#CADCFC",
+          "highlight": "#AFC0EE",
+          "error": "#FCA5A5",
+          "success": "#6EE7B7"
+        }
+      },
+      {
+        "name": "navy_surface_elevated",
+        "kind": "solid",
+        "bg": "#1E2761",
+        "on_bg": "#FFFFFF",
+        "on_bg_muted": "#CADCFC",
+        "roles": {
+          "link": "#CADCFC",
+          "border": "rgba(202, 220, 252, 0.22)"
+        }
+      },
+      {
+        "name": "interactive_kpi_card",
+        "kind": "solid",
+        "bg": "#FFFFFF",
+        "on_bg": "#101A36",
+        "on_bg_muted": "#475467",
+        "roles": {
+          "trend_positive": "#047857",
+          "trend_negative": "#B91C1C",
+          "border_active": "#1E2761"
+        }
+      },
+      {
+        "name": "crystal_nav_glass",
+        "kind": "glass",
+        "contrast_against": "#101A36",
+        "guarantee": "backdrop-blur-xl bg-white/90 border-b border-slate-200/80 (light mode) or bg-[#101A36]/90 border-b border-white/10 (dark mode)",
+        "on_bg": "#101A36",
+        "on_bg_muted": "#475467",
+        "roles": {
+          "cta_bg": "#1E2761",
+          "cta_text": "#FFFFFF"
+        }
+      },
+      {
+        "name": "ai_analyst_preview_panel",
+        "kind": "solid",
+        "bg": "#1E2761",
+        "on_bg": "#FFFFFF",
+        "on_bg_muted": "#CADCFC",
+        "roles": {
+          "verified_metric_pill": "#10B981",
+          "calculated_comparison_pill": "#60A5FA",
+          "estimate_pill": "#FBBF24",
+          "limitations_pill": "#F87171"
+        }
+      }
+    ]
+  },
+  "typography": {
+    "font_families": {
+      "heading": "'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      "body": "'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      "mono": "'JetBrains Mono Variable', monospace"
+    },
+    "scale_px": {
+      "display": 56,
+      "h1": 44,
+      "h2": 32,
+      "h3": 22,
+      "body": 16,
+      "caption": 14
+    },
+    "rules": {
+      "hero_h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.12]",
+      "section_h2": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.2]",
+      "subsection_h3": "text-lg sm:text-xl font-semibold text-slate-900 dark:text-white leading-[1.3]",
+      "eyebrow": "text-xs uppercase tracking-[0.2em] font-bold text-indigo-900 dark:text-ice-blue",
+      "body_text": "text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300",
+      "caption_text": "text-xs sm:text-sm leading-normal text-slate-500 dark:text-slate-400"
+    }
+  },
+  "entry_surfaces": {
+    "/": "split hero — brand headline + dual CTA left with microcopy; rich interactive CPGist analytics sample preview right",
+    "/platform": "editorial header with live platform capabilities overview and deep interactive module tabs",
+    "/solutions": "audience-centric matrix banner leading to tailored persona tabs with specific CPG problem-solution workflows",
+    "/how-it-works": "structured 6-stage analytical pipeline diagram with interactive data validation & AI analyst inspection simulator",
+    "/about": "calm editorial manifesto on accessible CPG intelligence without hype or fabricated claims",
+    "/contact": "split contact surface — value props & direct demo scope left, full validated MongoDB demo request form right",
+    "/signin": "honest branded auth entry — positioning badge left, sign-in form with server connection notice right",
+    "/privacy": "structured legal document surface with sticky table of contents and draft legal disclaimer",
+    "/terms": "structured terms of service with revision timestamps and liability parameters",
+    "/refund-policy": "transparent SaaS refund terms with subscription renewal disclosures",
+    "/cookies": "cookie governance breakdown with integrated instant Cookie Preference management",
+    "/data-deletion": "GDPR/CCPA compliance portal with direct account verification deletion intake form"
+  },
+  "layout_and_navigation": {
+    "header": {
+      "type": "Crystal Glass Sticky Bar (h-18, z-50)",
+      "classes": "sticky top-0 z-50 w-full backdrop-blur-xl bg-white/90 dark:bg-[#101A36]/90 border-b border-slate-200/80 dark:border-white/10 transition-colors",
+      "items": [
+        {"label": "Platform", "href": "/platform"},
+        {"label": "Solutions", "href": "/solutions"},
+        {"label": "How It Works", "href": "/how-it-works"},
+        {"label": "About", "href": "/about"},
+        {"label": "Contact", "href": "/contact"}
+      ],
+      "actions": [
+        {"label": "Sign In", "href": "/signin", "variant": "ghost"},
+        {"label": "Request a Demo", "href": "/contact", "variant": "default", "data_testid": "nav-cta-request-demo"}
+      ],
+      "mobile_drawer": "Accessible Sheet drawer triggered by hamburger button with keyboard tab-trap"
+    },
+    "footer": {
+      "type": "Midnight Navy Editorial Footer (py-16 sm:py-20)",
+      "bg": "#101A36",
+      "sections": [
+        {
+          "title": "Platform",
+          "links": [
+            {"label": "Executive Dashboard", "href": "/platform#executive"},
+            {"label": "Sales & Category Intelligence", "href": "/platform#sales"},
+            {"label": "Brand & Product Analytics", "href": "/platform#brand"},
+            {"label": "Retail & Distribution", "href": "/platform#retail"},
+            {"label": "Pricing & Promotion", "href": "/platform#pricing"},
+            {"label": "AI Analyst", "href": "/platform#ai-analyst"}
+          ]
+        },
+        {
+          "title": "Solutions",
+          "links": [
+            {"label": "For Emerging Brands", "href": "/solutions#emerging"},
+            {"label": "For Retail & Sales Teams", "href": "/solutions#retail-teams"},
+            {"label": "For Category Analysts", "href": "/solutions#analysts"},
+            {"label": "For CPG Consultants", "href": "/solutions#consultants"}
+          ]
+        },
+        {
+          "title": "Company & Trust",
+          "links": [
+            {"label": "About CPGist", "href": "/about"},
+            {"label": "How It Works", "href": "/how-it-works"},
+            {"label": "Request Demo", "href": "/contact"},
+            {"label": "Sign In", "href": "/signin"}
+          ]
+        },
+        {
+          "title": "Legal & Compliance",
+          "links": [
+            {"label": "Privacy Policy", "href": "/privacy"},
+            {"label": "Terms of Service", "href": "/terms"},
+            {"label": "Refund Policy", "href": "/refund-policy"},
+            {"label": "Cookie Policy", "href": "/cookies"},
+            {"label": "Data Deletion Request", "href": "/data-deletion"},
+            {"label": "Cookie Settings", "action": "open_cookie_modal", "href": "#"}
+          ]
+        }
+      ]
+    }
+  },
+  "interactive_product_preview_architecture": {
+    "component_path": "frontend/src/components/preview/InteractiveProductPreview.tsx",
+    "description": "Centerpiece synthetic data visualization simulating real CPGist intelligence suite. All charts, tables, and KPI metrics update synchronously on filter change.",
+    "dataset_spec": {
+      "brands": ["All Brands", "OatCraft Beverages", "VitalRoots Snacks", "PureBloom Wellness", "SunPeak Organic"],
+      "retailers": ["All Retailers", "Target", "Whole Foods", "Kroger", "Walmart", "Sprouts"],
+      "time_periods": ["Last 4 Weeks", "Last 12 Weeks", "Year to Date (YTD)", "Last 52 Weeks"],
+      "kpi_metrics": [
+        {"id": "sales", "label": "Total Gross Sales", "format": "currency", "base_value": 4820000, "trend_pct": 14.8},
+        {"id": "units", "label": "Unit Velocity", "format": "units", "base_value": 1120000, "trend_pct": 9.2},
+        {"id": "acv", "label": "% ACV Distribution", "format": "percent", "base_value": 72.4, "trend_pct": 5.1},
+        {"id": "promo", "label": "Promo Lift Ratio", "format": "multiplier", "base_value": 1.42, "trend_pct": -2.4}
+      ],
+      "weekly_trend_data": [
+        {"week": "W1", "sales": 360000, "units": 84000, "baseline": 330000, "promo": 30000},
+        {"week": "W2", "sales": 372000, "units": 86500, "baseline": 335000, "promo": 37000},
+        {"week": "W3", "sales": 415000, "units": 98000, "baseline": 340000, "promo": 75000},
+        {"week": "W4", "sales": 390000, "units": 91000, "baseline": 342000, "promo": 48000},
+        {"week": "W5", "sales": 445000, "units": 104000, "baseline": 348000, "promo": 97000},
+        {"week": "W6", "sales": 420000, "units": 98200, "baseline": 350000, "promo": 70000},
+        {"week": "W7", "sales": 465000, "units": 109000, "baseline": 355000, "promo": 110000},
+        {"week": "W8", "sales": 482000, "units": 112000, "baseline": 360000, "promo": 122000}
+      ],
+      "retailer_breakdown": [
+        {"retailer": "Target", "sales": 1640000, "growth": 18.2, "velocity": 24.6, "acv": 88, "promo_share": "28%"},
+        {"retailer": "Whole Foods", "sales": 1210000, "growth": 14.1, "velocity": 31.2, "acv": 92, "promo_share": "19%"},
+        {"retailer": "Kroger", "sales": 980000, "growth": 8.4, "velocity": 18.5, "acv": 64, "promo_share": "34%"},
+        {"retailer": "Walmart", "sales": 690000, "growth": 21.0, "velocity": 16.2, "acv": 48, "promo_share": "22%"},
+        {"retailer": "Sprouts", "sales": 300000, "growth": 11.5, "velocity": 22.0, "acv": 70, "promo_share": "15%"}
+      ],
+      "ai_analyst_static_presets": [
+        {
+          "question": "What is driving the recent unit velocity surge in Target vs. Kroger?",
+          "verified_metrics": "Target velocity grew +24.6% in L4W with an incremental promotional lift of +38% during the feature & display event in W7.",
+          "calculated_comparison": "Target's unit sales per store per week (SPW) reached 24.6 vs. Kroger's 18.5 SPW, representing a +33% efficiency advantage.",
+          "possible_explanations": "Endcap merchandising placement combined with a temporary $0.50 price promotion stimulated trial among cross-category shoppers.",
+          "limitations_and_missing_data": "Syndicated POS scan data does not account for localized out-of-stock rates or specific regional digital coupon redemptions."
+        },
+        {
+          "question": "Are price increases eroding volume in natural channel retailers?",
+          "verified_metrics": "Base price increased by +6.8% in Whole Foods and Sprouts over L12W. Total dollar sales rose +13.2% while units declined -1.4%.",
+          "calculated_comparison": "Price elasticity calculated at -0.42, indicating inelastic consumer demand with net positive revenue expansion.",
+          "possible_explanations": "Premium brand equity and high consumer loyalty in clean-ingredient categories insulate against moderate price adjustments.",
+          "limitations_and_missing_data": "Competitor promotional calendars during W4-W6 were not fully captured in the syndicated dataset."
+        }
+      ]
+    }
+  },
+  "compliance_and_privacy_system": {
+    "cookie_consent": {
+      "component_path": "frontend/src/components/compliance/CookieConsentBanner.tsx",
+      "storage_key": "cpgist_cookie_preferences_v1",
+      "categories": [
+        {"id": "essential", "name": "Strictly Necessary", "required": true, "desc": "Essential for core site navigation, form security, and state persistence."},
+        {"id": "analytics", "name": "Anonymous Analytics", "required": false, "desc": "Aggregated telemetry to gauge feature usage. No external ad tracking scripts loaded."}
+      ]
+    },
+    "data_deletion": {
+      "api_endpoint": "/api/compliance/data-deletion-requests",
+      "component_path": "frontend/src/pages/DataDeletion.tsx",
+      "storage_collection": "data_deletion_requests"
+    },
+    "contact_and_demo": {
+      "api_endpoint": "/api/contact/leads",
+      "component_path": "frontend/src/pages/Contact.tsx",
+      "storage_collection": "contact_leads"
+    }
+  },
+  "motion_and_interactions": {
+    "philosophy": "Restrained, crisp, professional (150ms-250ms). Zero bouncing, zero distracting floating blobs. Respects prefers-reduced-motion.",
+    "hover_rules": "All cards apply subtle transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease. Hover lifts cards by -2px with shadow-md.",
+    "tab_transitions": "Animate Presence with subtle fade-in (opacity 0 -> 1, duration 0.15s)."
+  },
+  "accessibility_requirements": {
+    "wcag_level": "WCAG 2.2 AA compliant",
+    "landmarks": "header, main, nav, section with aria-labelledby, footer",
+    "contrast": "All text strictly passes >= 4.5:1 against its declared surface",
+    "chart_alternatives": "Every Recharts graph provides an accessible aria-label and an expandable raw data table view for screen readers",
+    "test_attributes": "All interactive inputs, buttons, filters, modal triggers, and tabs MUST include role-based kebab-case data-testid attributes"
+  },
+  "instructions_to_main_agent": [
+    "1. Configure index.css with exact hex tokens (#101A36, #1E2761, #CADCFC, #F7F9FC, #667085) and import @fontsource-variable/inter.",
+    "2. Place the user's provided logo (orange/purple badge) in public/assets/cpgist-logo.png or reference the provided CDN URL, rendering with crisp chrome.",
+    "3. Build all 12 specified routes in App.tsx (Home, Platform, Solutions, How It Works, About, Contact, SignIn, Privacy, Terms, Refund Policy, Cookies, Data Deletion).",
+    "4. Build the rich InteractiveProductPreview centerpiece on Home with working filters (Brand, Retailer, Time Period) and synchronized synthetic metrics and charts.",
+    "5. Wire Contact / Demo form and Data Deletion form to FastAPI endpoints backed by MongoDB motor client with thorough Pydantic validation.",
+    "6. Build the honest Sign In page (/signin) with show/hide password, client validation, and clear feedback stating auth service connection status.",
+    "7. Implement CookieConsentBanner with customizable preferences and persistent footer link 'Cookie Settings'.",
+    "8. Ensure every button and input has data-testid attributes for automated testing."
+  ]
+}
