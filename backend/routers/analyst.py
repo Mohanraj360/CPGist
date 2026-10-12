@@ -16,7 +16,6 @@ import os
 import re
 import uuid
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 from fastapi import APIRouter, HTTPException
 from models.analyst import AnalystAnswer, AnalystContext, AnalystFinding, AnalystQuestionRequest
 
@@ -127,6 +126,17 @@ async def ask_analyst(payload: AnalystQuestionRequest) -> AnalystAnswer:
             detail=(
                 "AI Analyst isn't configured on this deployment. Set EMERGENT_LLM_KEY in "
                 "backend/.env to enable live analysis — the sample investigations below still work."
+            ),
+        )
+
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Live AI Analyst integration is unavailable in this deployment. "
+                "The core CPGist API can still run; configure a supported AI provider to enable live analysis."
             ),
         )
 
