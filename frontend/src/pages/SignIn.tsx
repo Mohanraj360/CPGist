@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type Mode = "signin" | "signup";
+type AuthResult = User | { status: "verification_required"; email: string; message: string };
 
 export default function SignIn() {
   usePageMeta({
@@ -43,16 +44,24 @@ export default function SignIn() {
   }, [isLoading, user, navigate]);
 
   const auth = useMutation({
-    mutationFn: (payload: { mode: Mode }) =>
+    mutationFn: (payload: { mode: Mode }): Promise<AuthResult> =>
       payload.mode === "signin"
         ? apiPost<User>("/auth/signin", { email: email.trim().toLowerCase(), password })
-        : apiPost<User>("/auth/signup", {
+        : apiPost<AuthResult>("/auth/signup", {
             name: name.trim(),
             email: email.trim().toLowerCase(),
             password,
             accept_terms: acceptTerms,
           }),
     onSuccess: async (data) => {
+      if ("status" in data && data.status === "verification_required") {
+        toast.success("Verification email sent. Check your inbox and spam folder.");
+        setFormError(null);
+        setMode("signin");
+        setEmail(data.email);
+        setPassword("");
+        return;
+      }
       await beginSession();
       toast.success(`Welcome${data.name ? `, ${data.name.split(" ")[0]}` : ""}.`);
       navigate("/workspace", { replace: true });
