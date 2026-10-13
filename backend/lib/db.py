@@ -31,6 +31,11 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("user_id", ASCENDING)], name="user_id", unique=True),
         IndexModel([("email", ASCENDING)], name="email", unique=True),
     ],
+    "email_verification_tokens": [
+        IndexModel([("token_hash", ASCENDING)], name="token_hash", unique=True),
+        IndexModel([("user_id", ASCENDING)], name="verification_user_id"),
+        IndexModel([("expires_at", ASCENDING)], name="verification_expires_ttl", expireAfterSeconds=0),
+    ],
     "user_sessions": [
         IndexModel([("session_token", ASCENDING)], name="session_token", unique=True),
         IndexModel([("user_id", ASCENDING)], name="user_id"),
