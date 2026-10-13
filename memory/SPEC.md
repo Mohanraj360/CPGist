@@ -6,13 +6,11 @@ Public marketing + compliance website for **CPGist**, an AI-powered CPG analytic
 backend, Vite + React 19 + TypeScript (strict) + Tailwind v4 + shadcn/ui (base-nova on
 @base-ui/react) + recharts + TanStack Query + react-router-dom.
 
-**Stack decision (documented per problem statement §12):** the preferred Next.js stack is not
-supported by this Emergent environment; the supported equivalent (Vite + React 19 + TS SPA with
-a FastAPI backend) is used instead. SEO is handled via per-page `usePageMeta` + static
+**Stack decision (documented per problem statement §12):** the current application uses Vite + React 19 + TypeScript with a FastAPI backend. SEO is handled via per-page `usePageMeta` + static
 `robots.txt`/`sitemap.xml` in `frontend/public/`.
 
 ## Public origin
-https://cpg-decision-hub.preview.emergentagent.com (frontend port 3000; API on 8001 via /api proxy).
+https://cpgist.vercel.app (frontend port 3000; API on 8001 via /api proxy).
 
 ## Routes (all in frontend/src/App.tsx)
 - `/` Home — hero, capability strip, problem, platform overview, **interactive product preview**
@@ -23,15 +21,13 @@ https://cpg-decision-hub.preview.emergentagent.com (frontend port 3000; API on 8
 - `/how-it-works` — 6-step pipeline + data-quality callout
 - `/about` — manifesto, principles, honest status ("what's real / what's not"), identity placeholders
 - `/contact` — demo/contact form → POST /api/contact/leads (stored in Mongo, validated client+server)
-- `/signin` — **live auth**: "Continue with Google" (Emergent Google Auth, primary) plus
+- `/signin` — **live auth**: "Continue with Google" (first-party Google OAuth) plus
   email/password sign-in and sign-up (toggle on the same page). Redirects to `/workspace` when
   already signed in. "Forgot password?" honestly reports that email reset needs a provider.
 - `/workspace` — **protected** (ProtectedRoute → redirect to `/signin` when unauthenticated).
   Shows account name/email/avatar, sign-out, an honest "illustrative sample dataset" notice with
   the pending-capabilities list from the API, and the full analytics preview + live AI Analyst.
-- OAuth callback: the auth redirect returns to `/workspace#session_id=...`; `SiteRoutes` detects
-  `location.hash` **during render** and mounts `AuthCallback`, which exchanges the id server-side
-  once (useRef guard for StrictMode), clears the hash, then lands on `/workspace`.
+- Google OAuth callback: the backend handles Google's authorization code, validates the verified email, creates the CPGist session cookie, then redirects to `/workspace`.
 - `/privacy`, `/terms`, `/refund-policy`, `/cookies`, `/data-deletion` — draft policies (version
   0.9-draft, effective 2026-10-11, "requires legal review" badges); `/data-deletion` posts to
   /api/compliance/data-deletion-requests; `/cookies` embeds live Cookie Settings
@@ -65,9 +61,9 @@ https://cpg-decision-hub.preview.emergentagent.com (frontend port 3000; API on 8
 ## Auth (backend/routers/auth.py, backend/lib/auth.py)
 Two sign-in paths converge on one **httpOnly `session_token` cookie** (7-day TTL, `secure`,
 `samesite=none` for the preview proxy). Tokens are never in a JSON body; nothing is logged.
-- `POST /api/auth/google/session` — exchanges the one-time `session_id` with Emergent Auth
-  (`demobackend.emergentagent.com/auth/v1/env/oauth/session-data`, `X-Session-ID` header)
-  **server-side**, upserts the user, issues the session. 401 on expired/used id.
+- `GET /api/auth/google/start` — redirects to Google OAuth using the CPGist Google Cloud client.
+- `GET /api/auth/google/callback` — exchanges the authorization code server-side, requires a verified Google email, upserts the user, issues the session cookie, and sends a welcome email for new accounts.
+- Email/password signup requires email verification before account access; verification and welcome emails use the configured Gmail API or Resend provider.
 - `POST /api/auth/signup` (201) / `POST /api/auth/signin` (200) — email+password, bcrypt via
   passlib. 409 on duplicate signup; 409 with guidance if the email is Google-only; 401 with an
   identical message for bad email *or* password (no account enumeration).
@@ -85,8 +81,7 @@ Two sign-in paths converge on one **httpOnly `session_token` cookie** (7-day TTL
 
 ## Backend (all on api_router under /api)
 - `POST /api/analyst/ask` → 200 `AnalystAnswer {question, findings[{kind,text}], note, source}`.
-  **Live AI**: Claude Sonnet 5.5 via `emergentintegrations` (`LlmChat`, non-streaming
-  `send_message`, stateless session per question) using `EMERGENT_LLM_KEY` from backend/.env.
+  **Live AI**: Google Gemini API (`GEMINI_API_KEY`, default model `gemini-2.5-flash`) called directly by the FastAPI backend over HTTPS.
   The frontend sends the question + `AnalystContext` (the exact dataset slice on screen, built by
   `frontend/src/lib/analyst.ts`), so the model can only cite visible numbers. System prompt forces
   evidence tagging (observed / calculated / estimate / explanation / limitation) and requires at
