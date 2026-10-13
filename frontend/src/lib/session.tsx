@@ -1,8 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost } from "./api";
 
-// Hand-written mirror of the User Pydantic model in backend/models/auth.py.
 export interface User {
   user_id: string;
   email: string;
@@ -13,20 +12,12 @@ export interface User {
 }
 
 export const SESSION_QUERY_KEY = ["auth", "session"] as const;
-
-/**
- * Sessions are httpOnly cookies the backend sets; the frontend never reads or
- * stores a token. `/auth/session` returns the user or null without throwing,
- * so public pages can render regardless of auth state.
- */
 const fetchSession = () => apiGet<User | null>("/auth/session");
 
 interface SessionContextValue {
   user: User | null;
   isLoading: boolean;
-  /** Re-read the session after a successful sign-in/sign-up. */
   beginSession: () => Promise<void>;
-  /** Always route sign-out through here — it clears the react-query cache too. */
   endSession: () => Promise<void>;
 }
 
@@ -35,9 +26,11 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Skip the probe while an OAuth callback is in flight: AuthCallback exchanges
-  // the session_id and establishes the cookie first.
-  const oauthInFlight = typeof window !== "undefined" && window.location.hash.includes("session_id=");
+  // Keep OAuth state reactive. The callback removes the URL hash, but
+  // history.replaceState alone does not trigger a React render.
+  const [oauthInFlight, setOauthInFlight] = useState(
+    () => typeof window !== "undefined" && window.location.hash.includes("session_id="),
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: SESSION_QUERY_KEY,
@@ -48,16 +41,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   });
 
   const beginSession = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
+    // Force a fresh session read after the backend sets the httpOnly cookie.
+    // Invalidating a disabled query alone does not guarantee it will refetch.
+    await queryClient.fetchQuery({
+      queryKey: SESSION_QUERY_KEY,
+      queryFn: fetchSession,
+      staleTime: 0,
+    });
+    setOauthInFlight(false);
   }, [queryClient]);
 
   const endSession = useCallback(async () => {
     try {
       await apiPost("/auth/logout");
     } finally {
-      // Clearing only the server session would leak the previous account's
-      // cached data to the next sign-in on this browser.
       queryClient.clear();
+      setOauthInFlight(false);
       await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
     }
   }, [queryClient]);
