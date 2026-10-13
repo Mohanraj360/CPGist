@@ -1,8 +1,6 @@
-"""Auth models — shared by both sign-in paths (Emergent Google Auth and
-email+password). Both issue the same httpOnly session cookie, so
-GET /api/auth/me behaves identically either way.
+"""Auth models shared by first-party Google OAuth and email+password sign-in.
 
-Hand-written TS mirrors live in frontend/src/lib/session.ts.
+Hand-written TS mirrors live in frontend/src/lib/session.tsx.
 """
 
 from datetime import datetime
@@ -22,10 +20,6 @@ class User(BaseModel):
     picture: str | None = None
     auth_methods: list[AuthMethod] = Field(default_factory=list)
     created_at: datetime
-
-
-class GoogleSessionRequest(BaseModel):
-    session_id: str = Field(min_length=8, max_length=512)
 
 
 class SignUpRequest(BaseModel):
