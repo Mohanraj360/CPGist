@@ -16,3 +16,9 @@ services:
         value: https://cp-gist.vercel.app,https://cpgist.vercel.app
       - key: APP_TZ
         value: Asia/Kolkata
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: FRONTEND_URL
+        value: https://cp-gist.vercel.app
