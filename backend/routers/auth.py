@@ -55,7 +55,7 @@ async def _send_email(*, to: str, subject: str, html: str) -> bool:
 
 
 async def _send_verification_email(email: str, name: str, token: str) -> bool:
-    link = f"{_frontend_url()}/verify-email?token={quote(token)}"
+    link = f"{_frontend_url()}/api/auth/verify-email?token={quote(token)}"
     safe_name = escape(name)
     return await _send_email(
         to=email,
