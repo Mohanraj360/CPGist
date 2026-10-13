@@ -284,7 +284,6 @@ async def google_auth_callback(
         return RedirectResponse(f"{frontend_signin}?error=google_email_unverified", status_code=303)
 
     existing = await db.users.find_one({"email": email}, {"_id": 0})
-    is_new_user = existing is None
     name = str(profile.get("name") or email.split("@")[0]).strip()
     picture = profile.get("picture")
     user_doc = await upsert_user(
@@ -307,9 +306,17 @@ async def google_auth_callback(
     )
     await create_session(user_doc["user_id"], redirect_response)
 
-    # Send a welcome message only for a newly created account, never on every login.
-    if is_new_user:
-        await _send_welcome_email(email, name)
+    # Send the welcome email once per CPGist account. This also covers accounts
+    # created before welcome-email delivery was wired up.
+    if not (existing or {}).get("welcome_email_sent_at"):
+        welcome_sent = await _send_welcome_email(email, name)
+        if welcome_sent:
+            await db.users.update_one(
+                {"user_id": user_doc["user_id"], "welcome_email_sent_at": {"$exists": False}},
+                {"$set": {"welcome_email_sent_at": datetime.now(timezone.utc)}},
+            )
+        else:
+            logger.warning("Google sign-in succeeded, but the CPGist welcome email was not delivered.")
 
     return redirect_response
 
@@ -366,7 +373,15 @@ async def verify_email(token: str) -> HTMLResponse:
         raise HTTPException(status_code=400, detail="Account not found. Please sign up again.")
     await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"email_verified": True, "email_verified_at": now}})
     await db.email_verification_tokens.delete_many({"user_id": user["user_id"]})
-    await _send_welcome_email(user["email"], user.get("name") or "there")
+    if not user.get("welcome_email_sent_at"):
+        welcome_sent = await _send_welcome_email(user["email"], user.get("name") or "there")
+        if welcome_sent:
+            await db.users.update_one(
+                {"user_id": user["user_id"], "welcome_email_sent_at": {"$exists": False}},
+                {"$set": {"welcome_email_sent_at": now}},
+            )
+        else:
+            logger.warning("Email verification succeeded, but the CPGist welcome email was not delivered.")
     safe_frontend = escape(_frontend_url(), quote=True)
     return HTMLResponse(f"""<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verified | CPGist</title></head>
     <body style="font-family:Arial,sans-serif;background:#f5f7fb;padding:48px 16px;color:#14233f"><main style="max-width:520px;margin:auto;background:white;padding:32px;border-radius:16px">
