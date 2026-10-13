@@ -5,7 +5,7 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from html import escape
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -157,10 +157,27 @@ async def _send_welcome_email(email: str, name: str) -> bool:
 
 
 def _google_redirect_uri() -> str:
+    """Keep OAuth callbacks on the frontend origin that owns the state cookie.
+
+    Vercel proxies /api requests to Render. A callback directly to the Render
+    hostname cannot receive a cookie scoped to cpgist.vercel.app, so prefer the
+    configured URI only when it uses the same host as FRONTEND_URL.
+    """
+    frontend_callback = f"{_frontend_url()}/api/auth/google/callback"
     configured = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
-    if configured:
+    if not configured:
+        return frontend_callback
+
+    configured_host = (urlparse(configured).hostname or "").lower()
+    frontend_host = (urlparse(_frontend_url()).hostname or "").lower()
+    if configured_host and configured_host == frontend_host:
         return configured
-    return f"{_frontend_url()}/api/auth/google/callback"
+
+    logger.warning(
+        "GOOGLE_REDIRECT_URI host does not match FRONTEND_URL; using the frontend-proxied OAuth callback. "
+        "Ensure this exact callback URI is authorized in Google Cloud Console."
+    )
+    return frontend_callback
 
 
 @router.get("/google/start")
