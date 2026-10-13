@@ -114,7 +114,9 @@ async def signup(payload: SignUpRequest) -> dict:
     if existing:
         if existing.get("email_verified") is True:
             raise HTTPException(status_code=409, detail="An account with this email already exists. Try signing in instead.")
-        # Pending accounts may request a fresh verification email by submitting signup again.
+        if "google" in (existing.get("auth_methods") or []) and not existing.get("password_hash"):
+            raise HTTPException(status_code=409, detail="This email is registered through Google. Use Google sign-in instead.")
+        # Only an unverified password account may request a fresh verification email.
         user_id = existing["user_id"]
         await db.users.update_one({"user_id": user_id}, {"$set": {
             "name": payload.name.strip(), "password_hash": hash_password(payload.password),
