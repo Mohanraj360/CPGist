@@ -32,25 +32,55 @@ def _frontend_url() -> str:
 
 
 async def _send_email(*, to: str, subject: str, html: str) -> bool:
-    """Send through Resend. Missing configuration is a logged operational error, not a fake success."""
-    api_key = os.getenv("RESEND_API_KEY")
-    sender = os.getenv("EMAIL_FROM")
-    if not api_key or not sender:
-        logger.error("Email not sent: configure RESEND_API_KEY and EMAIL_FROM in Render.")
-        return False
+    """Send email through Gmail SMTP; credentials must stay in backend environment variables."""
+    import asyncio
+    import smtplib
+    import ssl
+    from email.message import EmailMessage
+    from email.utils import formataddr
+
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     try:
-        async with httpx.AsyncClient(timeout=15.0) as http:
-            response = await http.post(
-                "https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                json={"from": sender, "to": [to], "subject": subject, "html": html},
-            )
-        if response.status_code >= 300:
-            logger.error("Email provider rejected message (status=%s).", response.status_code)
-            return False
+        port = int(os.getenv("SMTP_PORT", "465"))
+    except ValueError:
+        logger.error("Email not sent: SMTP_PORT must be an integer.")
+        return False
+    username = os.getenv("SMTP_USERNAME", "cpgistai@gmail.com").strip()
+    password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
+    sender_email = os.getenv("EMAIL_FROM", username).strip()
+    sender_name = os.getenv("EMAIL_FROM_NAME", "CPGist AI").strip()
+
+    if not username or not password or not sender_email:
+        logger.error("Email not sent: configure SMTP_USERNAME, SMTP_PASSWORD, and EMAIL_FROM in the backend environment.")
+        return False
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = formataddr((sender_name, sender_email))
+    message["To"] = to
+    message.set_content("This message contains HTML content. Please open it in an HTML-capable email client.")
+    message.add_alternative(html, subtype="html")
+
+    def deliver() -> None:
+        context = ssl.create_default_context()
+        if port == 465:
+            with smtplib.SMTP_SSL(host, port, timeout=20, context=context) as smtp:
+                smtp.login(username, password)
+                smtp.send_message(message)
+        else:
+            with smtplib.SMTP(host, port, timeout=20) as smtp:
+                smtp.ehlo()
+                smtp.starttls(context=context)
+                smtp.ehlo()
+                smtp.login(username, password)
+                smtp.send_message(message)
+
+    try:
+        await asyncio.to_thread(deliver)
         return True
     except Exception:
-        logger.exception("Email provider request failed.")
+        # Do not log message contents, credentials, or verification tokens.
+        logger.exception("Gmail SMTP delivery failed.")
         return False
 
 
