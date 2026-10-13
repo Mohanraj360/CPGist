@@ -14,6 +14,7 @@ import HowItWorks from "@/pages/HowItWorks";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import SignIn from "@/pages/SignIn";
+import AuthCallback from "@/pages/AuthCallback";
 import Workspace from "@/pages/Workspace";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -51,6 +52,7 @@ function SiteRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/workspace"
             element={
