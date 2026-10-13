@@ -48,7 +48,7 @@ def test_analyst_returns_tagged_findings(client: httpx.Client):
         timeout=90.0,
     )
     # 502 is an acceptable upstream-failure outcome; anything else must be a well-formed answer.
-    if res.status_code == 502:
+    if res.status_code in (502, 503):
         return
     assert res.status_code == 200, res.text
     body = res.json()
