@@ -44,11 +44,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const endSession = useCallback(async () => {
+    // Update the active query immediately so the header and protected routes
+    // react to sign-out without requiring a page refresh.
+    queryClient.setQueryData<User | null>(SESSION_QUERY_KEY, null);
+
     try {
       await apiPost("/auth/logout");
     } finally {
+      // Clear user-specific cached data, then explicitly retain an anonymous
+      // session value. Clearing alone can leave mounted observers showing stale
+      // data until they fetch again.
       queryClient.clear();
-      await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
+      queryClient.setQueryData<User | null>(SESSION_QUERY_KEY, null);
     }
   }, [queryClient]);
 
