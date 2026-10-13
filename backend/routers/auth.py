@@ -27,7 +27,7 @@ def _token_hash(token: str) -> str:
 
 
 def _frontend_url() -> str:
-    return os.getenv("FRONTEND_URL", "https://cpgist-mohanrajs-projects-4ffa6d5d.vercel.app").rstrip("/")
+    return os.getenv("FRONTEND_URL", "https://cpgist.vercel.app").rstrip("/")
 
 
 async def _send_email(*, to: str, subject: str, html: str) -> bool:
