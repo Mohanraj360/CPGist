@@ -63,7 +63,8 @@ export default function SignIn() {
         return;
       }
       await beginSession();
-      toast.success(`Welcome${data.name ? `, ${data.name.split(" ")[0]}` : ""}.`);
+      const displayName = "name" in data ? data.name : undefined;
+      toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}.`);
       navigate("/workspace", { replace: true });
     },
     onError: (err) => setFormError(apiErrorMessage(err, "We couldn't sign you in. Please try again.")),
