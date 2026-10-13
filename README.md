@@ -52,7 +52,8 @@ Configure backend variables in `backend/.env` locally and in the backend hosting
 | `MONGO_URL` | Yes | MongoDB connection string from your MongoDB provider |
 | `DB_NAME` | Yes | MongoDB database name, e.g. `cpgist` |
 | `CORS_ORIGINS` | Recommended | Comma-separated allowed origins for direct browser-to-backend calls |
-| `EMERGENT_LLM_KEY` | For live AI | Enables the live AI Analyst endpoint; obtain from the relevant Emergent integration/account |
+| `GEMINI_API_KEY` | For live AI | Enables the live AI Analyst endpoint; create in Google AI Studio and configure only in the backend environment |
+| `GEMINI_MODEL` | Optional | Gemini model ID; defaults to `gemini-2.5-flash` |
 | `APP_TZ` | Optional | Timezone used by date helpers |
 | `BACKEND_URL` | Tests only | API base URL for pytest; defaults are defined in `backend/tests/conftest.py` |
 | `TEST_PASSWORD` | Tests only | Optional test-only password setting if referenced by test code |
@@ -90,7 +91,7 @@ The API tests expect a running backend and reachable MongoDB. A frontend build a
 ## Deployment outline
 
 1. Deploy `backend/` as a Python/FastAPI web service with a persistent managed MongoDB connection.
-2. Set `MONGO_URL`, `DB_NAME`, `CORS_ORIGINS`, and (if live AI is required) `EMERGENT_LLM_KEY` in the backend host's secret settings.
+2. Set `MONGO_URL`, `DB_NAME`, `CORS_ORIGINS`, and (if live AI is required) `GEMINI_API_KEY` in the backend host's secret settings.
 3. Deploy `frontend/` to Vercel with **Root Directory** set to `frontend`, Framework Preset `Vite`, install command `yarn install --frozen-lockfile`, and build command `yarn build`.
 4. Configure a Vercel rewrite for `/api/:path*` to the backend URL, or update the API layer to use a configured API origin. Validate cookie/session behavior before production traffic.
 5. Set production origins carefully. Authentication uses an HTTP-only secure session cookie; verify cookie attributes and proxy behavior in the actual production domains.
@@ -103,5 +104,5 @@ No production deployment is considered complete until backend, database, auth, a
 - Keep `.env`, credentials, tokens, and real customer data out of Git.
 - Use a dedicated least-privilege MongoDB database user and TLS connection.
 - Configure CORS to known origins; do not use broad origins for a credentialed browser setup.
-- Do not expose `EMERGENT_LLM_KEY` or MongoDB credentials to the frontend.
+- Do not expose `GEMINI_API_KEY` or MongoDB credentials to the frontend.
 - The sample analytics preview is explicitly illustrative. Do not present it as real customer or syndicated retail data.

@@ -5,13 +5,13 @@
 - Architecture: monorepo-style layout with React 19 + TypeScript + Vite 8 frontend (`frontend/`) and FastAPI backend (`backend/`), MongoDB/Motor persistence, and Playwright/pytest test workspaces.
 - Frontend dependencies are pinned in `frontend/package.json` and `frontend/yarn.lock`; tests use `tests/yarn.lock`; backend dependencies are in `backend/requirements.txt`.
 - Backend entry point: `backend/server.py`; routers: auth, analyst, leads, workspace. API prefix is `/api`.
-- AI integration: `EMERGENT_LLM_KEY` used server-side in `backend/routers/analyst.py`; live AI endpoint reports 503 when not configured.
-- Authentication: email/password plus an Emergent Google-session exchange; sessions stored in MongoDB and issued as secure, HttpOnly cookies.
+- AI integration: `GEMINI_API_KEY` used server-side in `backend/routers/analyst.py`; live AI endpoint reports 503 when not configured.
+- Authentication: email/password plus first-party Google OAuth authorization-code exchange; sessions stored in MongoDB and issued as secure, HttpOnly cookies.
 - Database: MongoDB via `MONGO_URL` and `DB_NAME`; indexes are ensured at backend startup in `backend/lib/db.py`. No versioned migration directory or seed scripts were present.
 - Preview analytics data is synthetic/illustrative. The workspace endpoint explicitly marks its dataset as sample; do not present the preview as real customer or syndicated market data.
 - Existing root README was stale and described a generic `farm-ts` starter. It has been replaced with project-specific setup/deployment guidance.
-- Added `backend/.env.example`; updated `.gitignore` to exclude environment files, test credentials, generated caches, and local Emergent recordings.
-- Removed `memory/test_credentials.md` and generated `.emergent` recordings/scripts from the prepared copy to avoid publishing test login credentials and local development artifacts. No application source features were intentionally removed.
+- Added `backend/.env.example`; updated `.gitignore` to exclude environment files, test credentials, generated caches, and local development recordings.
+- Removed `memory/test_credentials.md` and generated local recordings/scripts from the prepared copy to avoid publishing test login credentials and local development artifacts. No application source features were intentionally removed.
 
 ## Security scan
 - Heuristic scan for private keys, GitHub tokens, AWS access keys, literal MongoDB credential URIs, and long generic API-key assignments: no matches in the prepared source copy.

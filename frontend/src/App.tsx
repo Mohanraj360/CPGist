@@ -14,8 +14,8 @@ import HowItWorks from "@/pages/HowItWorks";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import SignIn from "@/pages/SignIn";
-import Workspace from "@/pages/Workspace";
 import AuthCallback from "@/pages/AuthCallback";
+import Workspace from "@/pages/Workspace";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import RefundPolicy from "@/pages/RefundPolicy";
@@ -27,7 +27,7 @@ import NotFound from "@/pages/NotFound";
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
-    if (hash && !hash.includes("session_id=")) {
+    if (hash) {
       const el = document.getElementById(hash.slice(1));
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -40,16 +40,6 @@ function ScrollManager() {
 }
 
 function SiteRoutes() {
-  const location = useLocation();
-
-  // The auth redirect returns `#session_id=...`. Detect it during render (not in
-  // an effect) so the exchange happens before any session probe or route guard.
-  // Read it from useLocation().hash — window.location.hash is not reactive, so
-  // the callback screen would stick after history.replaceState clears it.
-  if (location.hash.includes("session_id=")) {
-    return <AuthCallback />;
-  }
-
   return (
     <>
       <Header />
@@ -62,6 +52,7 @@ function SiteRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/workspace"
             element={
