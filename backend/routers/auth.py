@@ -5,21 +5,20 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from html import escape
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.auth import (
     clear_session_cookie, create_session, current_user_optional, delete_session,
     hash_password, upsert_user, verify_password,
 )
 from lib.db import db
-from models.auth import GoogleSessionRequest, LogoutResponse, PasswordSignInRequest, SignUpRequest, User
+from models.auth import LogoutResponse, PasswordSignInRequest, SignUpRequest, User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth")
-EMERGENT_SESSION_DATA_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 VERIFY_TTL = timedelta(hours=24)
 
 
@@ -96,26 +95,138 @@ async def _send_welcome_email(email: str, name: str) -> bool:
     )
 
 
-@router.post("/google/session", response_model=User)
-async def exchange_google_session(payload: GoogleSessionRequest, response: Response) -> User:
+def _google_redirect_uri() -> str:
+    configured = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
+    if configured:
+        return configured
+    return f"{_frontend_url()}/api/auth/google/callback"
+
+
+@router.get("/google/start")
+async def google_auth_start() -> RedirectResponse:
+    """Begin first-party Google OAuth; no third-party authentication relay is used."""
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    redirect_uri = _google_redirect_uri()
+    if not client_id or not redirect_uri:
+        raise HTTPException(
+            status_code=503,
+            detail="Google sign-in is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_REDIRECT_URI in the backend environment.",
+        )
+    state = secrets.token_urlsafe(32)
+    params = urlencode({
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    })
+    response = RedirectResponse(
+        f"https://accounts.google.com/o/oauth2/v2/auth?{params}",
+        status_code=302,
+    )
+    response.set_cookie(
+        key="google_oauth_state",
+        value=state,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/api/auth/google",
+        max_age=600,
+    )
+    return response
+
+
+@router.get("/google/callback")
+async def google_auth_callback(
+    request: Request,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    """Exchange Google's authorization code, validate the profile, and create a CPGist session."""
+    frontend_signin = f"{_frontend_url()}/signin"
+    if error or not code or not state:
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_failed", status_code=303)
+
+    saved_state = request.cookies.get("google_oauth_state", "")
+    if not saved_state or not secrets.compare_digest(saved_state, state):
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_state", status_code=303)
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+    redirect_uri = _google_redirect_uri()
+    if not client_id or not client_secret or not redirect_uri:
+        logger.error("Google OAuth callback reached without required server configuration.")
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_config", status_code=303)
+
     try:
         async with httpx.AsyncClient(timeout=20.0) as http:
-            upstream = await http.get(EMERGENT_SESSION_DATA_URL, headers={"X-Session-ID": payload.session_id})
-    except Exception:
-        logger.exception("Emergent Auth session-data call failed")
-        raise HTTPException(status_code=502, detail="Could not reach the sign-in service. Please try again.")
-    if upstream.status_code != 200:
-        raise HTTPException(status_code=401, detail="This sign-in link has expired. Please sign in again.")
-    data = upstream.json()
-    email, name = data.get("email"), data.get("name")
-    if not email:
-        raise HTTPException(status_code=502, detail="The sign-in service returned an incomplete profile.")
-    user_doc = await upsert_user(email=email.lower().strip(), name=name or email.split("@")[0],
-                                 picture=data.get("picture"), method="google")
-    await create_session(user_doc["user_id"], response, token=data.get("session_token"))
-    user_doc.pop("password_hash", None)
-    user_doc.pop("last_login_at", None)
-    return User(**user_doc)
+            token_response = await http.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            if token_response.status_code != 200:
+                logger.warning("Google OAuth token exchange failed with HTTP status %s.", token_response.status_code)
+                return RedirectResponse(f"{frontend_signin}?error=google_token_exchange", status_code=303)
+            token_data = token_response.json()
+            access_token = token_data.get("access_token")
+            if not access_token:
+                logger.warning("Google OAuth token response did not contain an access token.")
+                return RedirectResponse(f"{frontend_signin}?error=google_profile", status_code=303)
+            profile_response = await http.get(
+                "https://openidconnect.googleapis.com/v1/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            if profile_response.status_code != 200:
+                logger.warning("Google userinfo request failed with HTTP status %s.", profile_response.status_code)
+                return RedirectResponse(f"{frontend_signin}?error=google_profile", status_code=303)
+            profile = profile_response.json()
+    except httpx.HTTPError:
+        logger.exception("Google OAuth HTTPS request failed.")
+        return RedirectResponse(f"{frontend_signin}?error=google_network", status_code=303)
+
+    email = str(profile.get("email") or "").strip().lower()
+    email_verified = profile.get("email_verified") is True or str(profile.get("email_verified")).lower() == "true"
+    if not email or not email_verified:
+        return RedirectResponse(f"{frontend_signin}?error=google_email_unverified", status_code=303)
+
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    is_new_user = existing is None
+    name = str(profile.get("name") or email.split("@")[0]).strip()
+    picture = profile.get("picture")
+    user_doc = await upsert_user(
+        email=email,
+        name=name,
+        picture=picture,
+        method="google",
+    )
+    await db.users.update_one(
+        {"user_id": user_doc["user_id"]},
+        {"$set": {"email_verified": True, "email_verified_at": datetime.now(timezone.utc)}},
+    )
+
+    redirect_response = RedirectResponse(f"{_frontend_url()}/workspace", status_code=303)
+    redirect_response.delete_cookie(
+        key="google_oauth_state",
+        path="/api/auth/google",
+        samesite="lax",
+        secure=True,
+    )
+    await create_session(user_doc["user_id"], redirect_response)
+
+    # Send a welcome message only for a newly created account, never on every login.
+    if is_new_user:
+        await _send_welcome_email(email, name)
+
+    return redirect_response
 
 
 @router.post("/signup", status_code=202)
