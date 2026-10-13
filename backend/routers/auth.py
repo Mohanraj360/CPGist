@@ -31,22 +31,82 @@ def _frontend_url() -> str:
 
 
 async def _send_email(*, to: str, subject: str, html: str) -> bool:
-    """Send transactional email via Resend's HTTPS API (never SMTP)."""
+    """Send mail from the CPGist Gmail account through Gmail API when configured.
+
+    Resend is a fallback for deployments that use a verified sender domain. Gmail
+    SMTP is deliberately not used because Render deployments may block outbound SMTP.
+    """
+    sender_name = os.getenv("EMAIL_FROM_NAME", "CPGist AI").strip()
+    reply_to = os.getenv("EMAIL_REPLY_TO", "cpgistai@gmail.com").strip()
+    gmail_client_id = os.getenv("GMAIL_OAUTH_CLIENT_ID", "").strip()
+    gmail_client_secret = os.getenv("GMAIL_OAUTH_CLIENT_SECRET", "").strip()
+    gmail_refresh_token = os.getenv("GMAIL_OAUTH_REFRESH_TOKEN", "").strip()
+    gmail_sender = os.getenv("GMAIL_SENDER_EMAIL", "cpgistai@gmail.com").strip()
+    gmail_config_values = (gmail_client_id, gmail_client_secret, gmail_refresh_token)
+    gmail_configured = any(gmail_config_values)
+
+    if gmail_configured:
+        if not all(gmail_config_values) or not gmail_sender:
+            logger.error("Gmail API email delivery is configured incompletely; check GMAIL_OAUTH_CLIENT_ID, GMAIL_OAUTH_CLIENT_SECRET, GMAIL_OAUTH_REFRESH_TOKEN, and GMAIL_SENDER_EMAIL.")
+            return False
+        try:
+            from email.message import EmailMessage
+            from email.utils import formataddr
+            import base64
+
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                token_response = await client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "client_id": gmail_client_id,
+                        "client_secret": gmail_client_secret,
+                        "refresh_token": gmail_refresh_token,
+                        "grant_type": "refresh_token",
+                    },
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                if token_response.status_code != 200:
+                    logger.error("Gmail API access-token refresh failed with HTTP status %s.", token_response.status_code)
+                    return False
+                access_token = token_response.json().get("access_token")
+                if not access_token:
+                    logger.error("Gmail API token response did not include an access token.")
+                    return False
+
+                message = EmailMessage()
+                message["Subject"] = subject
+                message["From"] = formataddr((sender_name, gmail_sender))
+                message["To"] = to
+                if reply_to:
+                    message["Reply-To"] = reply_to
+                message.set_content("This email contains HTML content. Please open it in an HTML-capable email client.")
+                message.add_alternative(html, subtype="html")
+                raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("ascii").rstrip("=")
+                send_response = await client.post(
+                    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    json={"raw": raw_message},
+                )
+            if send_response.status_code not in (200, 201):
+                logger.error("Gmail API message send failed with HTTP status %s.", send_response.status_code)
+                return False
+            return True
+        except Exception:
+            logger.exception("Gmail API email delivery failed.")
+            return False
+
+    # Resend fallback: the From address must be a sender/domain verified in Resend.
     api_key = os.getenv("RESEND_API_KEY", "").strip()
     sender_email = os.getenv("RESEND_FROM_EMAIL", "").strip()
-    sender_name = os.getenv("EMAIL_FROM_NAME", "CPGist AI").strip()
-
     if not api_key or not sender_email:
-        logger.error("Email not sent: configure RESEND_API_KEY and RESEND_FROM_EMAIL in the backend environment.")
+        logger.error("Email not sent: configure Gmail API credentials or RESEND_API_KEY and RESEND_FROM_EMAIL.")
         return False
-
     payload = {
         "from": f"{sender_name} <{sender_email}>",
         "to": [to],
         "subject": subject,
         "html": html,
     }
-    reply_to = os.getenv("EMAIL_REPLY_TO", "").strip()
     if reply_to:
         payload["reply_to"] = [reply_to]
     try:
@@ -60,12 +120,10 @@ async def _send_email(*, to: str, subject: str, html: str) -> bool:
                 json=payload,
             )
         if response.status_code not in (200, 201):
-            # Log status only; avoid exposing provider response or account details.
             logger.error("Resend email delivery failed with HTTP status %s.", response.status_code)
             return False
         return True
     except Exception:
-        # Do not log message contents, credentials, or verification tokens.
         logger.exception("Resend email API request failed.")
         return False
 
