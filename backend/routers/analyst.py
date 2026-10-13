@@ -14,6 +14,8 @@ import logging
 import os
 import re
 
+import httpx
+
 from fastapi import APIRouter, HTTPException
 from models.analyst import AnalystAnswer, AnalystContext, AnalystFinding, AnalystQuestionRequest
 
@@ -122,8 +124,8 @@ async def ask_analyst(payload: AnalystQuestionRequest) -> AnalystAnswer:
 
     question = payload.question.strip()
     prompt = (
-        f"Business question: {question}\\n\\n"
-        f"Sample dataset currently displayed (JSON):\\n{_context_payload(payload.context)}\\n\\n"
+        f"Business question: {question}\n\n"
+        f"Sample dataset currently displayed (JSON):\n{_context_payload(payload.context)}\n\n"
         "Return the JSON object of tagged findings now."
     )
     request_body = {
@@ -145,7 +147,7 @@ async def ask_analyst(payload: AnalystQuestionRequest) -> AnalystAnswer:
         result = response.json()
         candidates = result.get("candidates") or []
         parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
-        reply = "\\n".join(str(part.get("text", "")) for part in parts if isinstance(part, dict) and part.get("text"))
+        reply = "\n".join(str(part.get("text", "")) for part in parts if isinstance(part, dict) and part.get("text"))
         if not reply.strip():
             raise ValueError("Gemini returned no text content")
     except HTTPException:
