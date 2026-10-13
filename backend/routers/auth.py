@@ -192,7 +192,10 @@ async def google_auth_start() -> RedirectResponse:
         httponly=True,
         secure=True,
         samesite="lax",
-        path="/api/auth/google",
+        # Use the site-wide path because the production API is reverse-proxied
+        # through Vercel. This ensures the short-lived state cookie is sent to
+        # the callback even if the proxy normalizes the request path.
+        path="/",
         max_age=600,
     )
     return response
@@ -211,7 +214,11 @@ async def google_auth_callback(
         return RedirectResponse(f"{frontend_signin}?error=google_auth_failed", status_code=303)
 
     saved_state = request.cookies.get("google_oauth_state", "")
-    if not saved_state or not secrets.compare_digest(saved_state, state):
+    if not saved_state:
+        logger.warning("Google OAuth state validation failed: state cookie missing on callback.")
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_state", status_code=303)
+    if not secrets.compare_digest(saved_state, state):
+        logger.warning("Google OAuth state validation failed: cookie and callback state did not match.")
         return RedirectResponse(f"{frontend_signin}?error=google_auth_state", status_code=303)
 
     client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
@@ -277,7 +284,7 @@ async def google_auth_callback(
     redirect_response = RedirectResponse(f"{_frontend_url()}/workspace", status_code=303)
     redirect_response.delete_cookie(
         key="google_oauth_state",
-        path="/api/auth/google",
+        path="/",
         samesite="lax",
         secure=True,
     )
