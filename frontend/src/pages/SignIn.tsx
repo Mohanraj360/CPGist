@@ -43,6 +43,24 @@ export default function SignIn() {
     if (!isLoading && user) navigate("/workspace", { replace: true });
   }, [isLoading, user, navigate]);
 
+  // Show a useful message when Google's OAuth callback returns an error.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (!error) return;
+    const messages: Record<string, string> = {
+      google_auth_failed: "Google sign-in was cancelled or failed. Please try again.",
+      google_auth_state: "Google sign-in could not be verified. Please try again.",
+      google_auth_config: "Google sign-in is not configured yet. Please contact the CPGist administrator.",
+      google_token_exchange: "Google could not complete sign-in. Check the OAuth client configuration and try again.",
+      google_profile: "Google did not return a usable profile. Please try again.",
+      google_network: "Could not reach Google sign-in. Please try again.",
+      google_email_unverified: "Your Google account email must be verified before you can sign in.",
+    };
+    setFormError(messages[error] ?? "Google sign-in failed. Please try again.");
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
   const auth = useMutation({
     mutationFn: (payload: { mode: Mode }): Promise<AuthResult> =>
       payload.mode === "signin"
