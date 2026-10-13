@@ -5,16 +5,14 @@ The model is instructed to cite only numbers present in that context and to tag
 every finding, so the response renders into the same evidence pills the static
 sample answers use.
 
-Uses the Emergent universal LLM key via emergentintegrations. Non-streaming
-(send_message) on purpose: the UI renders a parsed, structured set of findings
-at once rather than a prose stream.
+Uses the Gemini API directly. Non-streaming on purpose: the UI renders a parsed,
+structured set of findings at once rather than a prose stream.
 """
 
 import json
 import logging
 import os
 import re
-import uuid
 
 from fastapi import APIRouter, HTTPException
 from models.analyst import AnalystAnswer, AnalystContext, AnalystFinding, AnalystQuestionRequest
@@ -22,8 +20,7 @@ from models.analyst import AnalystAnswer, AnalystContext, AnalystFinding, Analys
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-MODEL_PROVIDER = "anthropic"
-MODEL_NAME = "claude-sonnet-5-5"
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
 
 VALID_KINDS = {"observed", "calculated", "estimate", "explanation", "limitation"}
 
@@ -119,62 +116,48 @@ def _parse_findings(raw: str) -> list[AnalystFinding]:
 
 @router.post("/analyst/ask", response_model=AnalystAnswer)
 async def ask_analyst(payload: AnalystQuestionRequest) -> AnalystAnswer:
-    api_key = os.environ.get("EMERGENT_LLM_KEY", "").strip()
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "AI Analyst isn't configured on this deployment. Set EMERGENT_LLM_KEY in "
-                "backend/.env to enable live analysis — the sample investigations below still work."
-            ),
-        )
-
-    try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail=(
-                "Live AI Analyst integration is unavailable in this deployment. "
-                "The core CPGist API can still run; configure a supported AI provider to enable live analysis."
-            ),
-        )
+        raise HTTPException(status_code=503, detail="AI Analyst is not configured. Set GEMINI_API_KEY in the backend environment; sample investigations remain available.")
 
     question = payload.question.strip()
-    chat = LlmChat(
-        api_key=api_key,
-        session_id=f"cpgist-analyst-{uuid.uuid4()}",  # stateless: one session per question
-        system_message=SYSTEM_MESSAGE,
-    ).with_model(MODEL_PROVIDER, MODEL_NAME)
-
     prompt = (
-        f"Business question: {question}\n\n"
-        f"Sample dataset currently displayed (JSON):\n{_context_payload(payload.context)}\n\n"
+        f"Business question: {question}\\n\\n"
+        f"Sample dataset currently displayed (JSON):\\n{_context_payload(payload.context)}\\n\\n"
         "Return the JSON object of tagged findings now."
     )
+    request_body = {
+        "system_instruction": {"parts": [{"text": SYSTEM_MESSAGE}]},
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.2},
+    }
 
     try:
-        reply = await chat.send_message(UserMessage(text=prompt))
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent",
+                headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
+                json=request_body,
+            )
+        if response.status_code != 200:
+            logger.error("Gemini AI Analyst request failed with HTTP status %s.", response.status_code)
+            raise HTTPException(status_code=502, detail="The AI Analyst could not be reached. Please try again; sample investigations remain available offline.")
+        result = response.json()
+        candidates = result.get("candidates") or []
+        parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
+        reply = "\\n".join(str(part.get("text", "")) for part in parts if isinstance(part, dict) and part.get("text"))
+        if not reply.strip():
+            raise ValueError("Gemini returned no text content")
+    except HTTPException:
+        raise
     except Exception:
-        logger.exception("AI Analyst upstream call failed")
-        raise HTTPException(
-            status_code=502,
-            detail=(
-                "The AI Analyst couldn't be reached just now. Please try again — "
-                "the sample investigations below still work offline."
-            ),
-        )
+        logger.exception("Gemini AI Analyst upstream call failed")
+        raise HTTPException(status_code=502, detail="The AI Analyst could not be reached. Please try again; sample investigations remain available offline.")
 
     try:
-        findings = _parse_findings(reply if isinstance(reply, str) else str(reply))
+        findings = _parse_findings(reply)
     except Exception:
-        logger.warning("AI Analyst returned unparseable output")
-        raise HTTPException(
-            status_code=502,
-            detail=(
-                "The AI Analyst returned a response CPGist couldn't structure safely, so it "
-                "wasn't shown. Please rephrase your question and try again."
-            ),
-        )
+        logger.warning("Gemini AI Analyst returned unparseable output")
+        raise HTTPException(status_code=502, detail="The AI Analyst returned a response CPGist could not structure safely. Please rephrase your question and try again.")
 
     return AnalystAnswer(question=question, findings=findings, note=LIVE_NOTE, source="live_ai")
