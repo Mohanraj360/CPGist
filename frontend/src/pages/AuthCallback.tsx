@@ -2,12 +2,7 @@ import { Link } from "react-router-dom";
 import { Logo } from "@/components/site/Logo";
 import { buttonVariants } from "@/components/ui/button";
 
-/**
- * Exchanges the one-time `session_id` from the auth redirect fragment for a
- * real httpOnly session, then lands the user in the workspace.
- *
- * REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
- */
+/** Fallback UI for an incomplete sign-in flow; OAuth is completed by the backend. */
 export default function AuthCallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-page px-4">
