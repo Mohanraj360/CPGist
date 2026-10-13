@@ -27,7 +27,7 @@ def _token_hash(token: str) -> str:
 
 
 def _frontend_url() -> str:
-    return os.getenv("FRONTEND_URL", "https://cp-gist.vercel.app").rstrip("/")
+    return os.getenv("FRONTEND_URL", "https://cpgist-mohanrajs-projects-4ffa6d5d.vercel.app").rstrip("/")
 
 
 async def _send_email(*, to: str, subject: str, html: str) -> bool:
@@ -46,6 +46,9 @@ async def _send_email(*, to: str, subject: str, html: str) -> bool:
         "subject": subject,
         "html": html,
     }
+    reply_to = os.getenv("EMAIL_REPLY_TO", "").strip()
+    if reply_to:
+        payload["reply_to"] = [reply_to]
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
             response = await client.post(
