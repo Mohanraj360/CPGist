@@ -85,7 +85,6 @@ android-sdk/
 /tests/test-results/
 
 # overlay black-box crash/user-report dumps — session data, never history
-**/.emergent/recordings/
 
 # Local environment files and secrets
 .env
@@ -105,6 +104,3 @@ android-sdk/
 htmlcov/
 memory/test_credentials.md
 
-# Emergent development recordings and generated scripts are local-only
-.emergent/recordings/
-.emergent/scripts/adhoc/
