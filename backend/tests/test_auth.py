@@ -119,6 +119,6 @@ def test_signin_correct_password_sets_session():
         assert c2.get("/auth/me", headers=_bearer(signin)).status_code == 200
 
 
-def test_google_session_rejects_bad_session_id(client: httpx.Client):
-    res = client.post("/auth/google/session", json={"session_id": "clearly-not-a-valid-session"})
-    assert res.status_code == 401
+def test_legacy_third_party_google_session_endpoint_is_removed(client: httpx.Client):
+    res = client.post("/auth/google/session", json={"session_id": "legacy-session-id"})
+    assert res.status_code == 404

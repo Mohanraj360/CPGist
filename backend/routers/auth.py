@@ -5,21 +5,20 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from html import escape
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from lib.auth import (
     clear_session_cookie, create_session, current_user_optional, delete_session,
     hash_password, upsert_user, verify_password,
 )
 from lib.db import db
-from models.auth import GoogleSessionRequest, LogoutResponse, PasswordSignInRequest, SignUpRequest, User
+from models.auth import LogoutResponse, PasswordSignInRequest, SignUpRequest, User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth")
-EMERGENT_SESSION_DATA_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
 VERIFY_TTL = timedelta(hours=24)
 
 
@@ -28,59 +27,104 @@ def _token_hash(token: str) -> str:
 
 
 def _frontend_url() -> str:
-    return os.getenv("FRONTEND_URL", "https://cp-gist.vercel.app").rstrip("/")
+    return os.getenv("FRONTEND_URL", "https://cpgist-mohanrajs-projects-4ffa6d5d.vercel.app").rstrip("/")
 
 
 async def _send_email(*, to: str, subject: str, html: str) -> bool:
-    """Send email through Gmail SMTP; credentials must stay in backend environment variables."""
-    import asyncio
-    import smtplib
-    import ssl
-    from email.message import EmailMessage
-    from email.utils import formataddr
+    """Send mail from the CPGist Gmail account through Gmail API when configured.
 
-    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    try:
-        port = int(os.getenv("SMTP_PORT", "465"))
-    except ValueError:
-        logger.error("Email not sent: SMTP_PORT must be an integer.")
-        return False
-    username = os.getenv("SMTP_USERNAME", "cpgistai@gmail.com").strip()
-    password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
-    sender_email = os.getenv("EMAIL_FROM", username).strip()
+    Resend is a fallback for deployments that use a verified sender domain. Gmail
+    SMTP is deliberately not used because Render deployments may block outbound SMTP.
+    """
     sender_name = os.getenv("EMAIL_FROM_NAME", "CPGist AI").strip()
+    reply_to = os.getenv("EMAIL_REPLY_TO", "cpgistai@gmail.com").strip()
+    gmail_client_id = os.getenv("GMAIL_OAUTH_CLIENT_ID", "").strip()
+    gmail_client_secret = os.getenv("GMAIL_OAUTH_CLIENT_SECRET", "").strip()
+    gmail_refresh_token = os.getenv("GMAIL_OAUTH_REFRESH_TOKEN", "").strip()
+    gmail_sender = os.getenv("GMAIL_SENDER_EMAIL", "cpgistai@gmail.com").strip()
+    gmail_config_values = (gmail_client_id, gmail_client_secret, gmail_refresh_token)
+    gmail_configured = any(gmail_config_values)
 
-    if not username or not password or not sender_email:
-        logger.error("Email not sent: configure SMTP_USERNAME, SMTP_PASSWORD, and EMAIL_FROM in the backend environment.")
+    if gmail_configured:
+        if not all(gmail_config_values) or not gmail_sender:
+            logger.error("Gmail API email delivery is configured incompletely; check GMAIL_OAUTH_CLIENT_ID, GMAIL_OAUTH_CLIENT_SECRET, GMAIL_OAUTH_REFRESH_TOKEN, and GMAIL_SENDER_EMAIL.")
+            return False
+        try:
+            from email.message import EmailMessage
+            from email.utils import formataddr
+            import base64
+
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                token_response = await client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "client_id": gmail_client_id,
+                        "client_secret": gmail_client_secret,
+                        "refresh_token": gmail_refresh_token,
+                        "grant_type": "refresh_token",
+                    },
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                if token_response.status_code != 200:
+                    logger.error("Gmail API access-token refresh failed with HTTP status %s.", token_response.status_code)
+                    return False
+                access_token = token_response.json().get("access_token")
+                if not access_token:
+                    logger.error("Gmail API token response did not include an access token.")
+                    return False
+
+                message = EmailMessage()
+                message["Subject"] = subject
+                message["From"] = formataddr((sender_name, gmail_sender))
+                message["To"] = to
+                if reply_to:
+                    message["Reply-To"] = reply_to
+                message.set_content("This email contains HTML content. Please open it in an HTML-capable email client.")
+                message.add_alternative(html, subtype="html")
+                raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("ascii").rstrip("=")
+                send_response = await client.post(
+                    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    json={"raw": raw_message},
+                )
+            if send_response.status_code not in (200, 201):
+                logger.error("Gmail API message send failed with HTTP status %s.", send_response.status_code)
+                return False
+            return True
+        except Exception:
+            logger.exception("Gmail API email delivery failed.")
+            return False
+
+    # Resend fallback: the From address must be a sender/domain verified in Resend.
+    api_key = os.getenv("RESEND_API_KEY", "").strip()
+    sender_email = os.getenv("RESEND_FROM_EMAIL", "").strip()
+    if not api_key or not sender_email:
+        logger.error("Email not sent: configure Gmail API credentials or RESEND_API_KEY and RESEND_FROM_EMAIL.")
         return False
-
-    message = EmailMessage()
-    message["Subject"] = subject
-    message["From"] = formataddr((sender_name, sender_email))
-    message["To"] = to
-    message.set_content("This message contains HTML content. Please open it in an HTML-capable email client.")
-    message.add_alternative(html, subtype="html")
-
-    def deliver() -> None:
-        context = ssl.create_default_context()
-        if port == 465:
-            with smtplib.SMTP_SSL(host, port, timeout=20, context=context) as smtp:
-                smtp.login(username, password)
-                smtp.send_message(message)
-        else:
-            with smtplib.SMTP(host, port, timeout=20) as smtp:
-                smtp.ehlo()
-                smtp.starttls(context=context)
-                smtp.ehlo()
-                smtp.login(username, password)
-                smtp.send_message(message)
-
+    payload = {
+        "from": f"{sender_name} <{sender_email}>",
+        "to": [to],
+        "subject": subject,
+        "html": html,
+    }
+    if reply_to:
+        payload["reply_to"] = [reply_to]
     try:
-        await asyncio.to_thread(deliver)
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+            )
+        if response.status_code not in (200, 201):
+            logger.error("Resend email delivery failed with HTTP status %s.", response.status_code)
+            return False
         return True
     except Exception:
-        # Do not log message contents, credentials, or verification tokens.
-        logger.exception("Gmail SMTP delivery failed.")
+        logger.exception("Resend email API request failed.")
         return False
 
 
@@ -112,26 +156,138 @@ async def _send_welcome_email(email: str, name: str) -> bool:
     )
 
 
-@router.post("/google/session", response_model=User)
-async def exchange_google_session(payload: GoogleSessionRequest, response: Response) -> User:
+def _google_redirect_uri() -> str:
+    configured = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
+    if configured:
+        return configured
+    return f"{_frontend_url()}/api/auth/google/callback"
+
+
+@router.get("/google/start")
+async def google_auth_start() -> RedirectResponse:
+    """Begin first-party Google OAuth; no third-party authentication relay is used."""
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    redirect_uri = _google_redirect_uri()
+    if not client_id or not redirect_uri:
+        raise HTTPException(
+            status_code=503,
+            detail="Google sign-in is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_REDIRECT_URI in the backend environment.",
+        )
+    state = secrets.token_urlsafe(32)
+    params = urlencode({
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    })
+    response = RedirectResponse(
+        f"https://accounts.google.com/o/oauth2/v2/auth?{params}",
+        status_code=302,
+    )
+    response.set_cookie(
+        key="google_oauth_state",
+        value=state,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/api/auth/google",
+        max_age=600,
+    )
+    return response
+
+
+@router.get("/google/callback")
+async def google_auth_callback(
+    request: Request,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    """Exchange Google's authorization code, validate the profile, and create a CPGist session."""
+    frontend_signin = f"{_frontend_url()}/signin"
+    if error or not code or not state:
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_failed", status_code=303)
+
+    saved_state = request.cookies.get("google_oauth_state", "")
+    if not saved_state or not secrets.compare_digest(saved_state, state):
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_state", status_code=303)
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+    redirect_uri = _google_redirect_uri()
+    if not client_id or not client_secret or not redirect_uri:
+        logger.error("Google OAuth callback reached without required server configuration.")
+        return RedirectResponse(f"{frontend_signin}?error=google_auth_config", status_code=303)
+
     try:
         async with httpx.AsyncClient(timeout=20.0) as http:
-            upstream = await http.get(EMERGENT_SESSION_DATA_URL, headers={"X-Session-ID": payload.session_id})
-    except Exception:
-        logger.exception("Emergent Auth session-data call failed")
-        raise HTTPException(status_code=502, detail="Could not reach the sign-in service. Please try again.")
-    if upstream.status_code != 200:
-        raise HTTPException(status_code=401, detail="This sign-in link has expired. Please sign in again.")
-    data = upstream.json()
-    email, name = data.get("email"), data.get("name")
-    if not email:
-        raise HTTPException(status_code=502, detail="The sign-in service returned an incomplete profile.")
-    user_doc = await upsert_user(email=email.lower().strip(), name=name or email.split("@")[0],
-                                 picture=data.get("picture"), method="google")
-    await create_session(user_doc["user_id"], response, token=data.get("session_token"))
-    user_doc.pop("password_hash", None)
-    user_doc.pop("last_login_at", None)
-    return User(**user_doc)
+            token_response = await http.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            if token_response.status_code != 200:
+                logger.warning("Google OAuth token exchange failed with HTTP status %s.", token_response.status_code)
+                return RedirectResponse(f"{frontend_signin}?error=google_token_exchange", status_code=303)
+            token_data = token_response.json()
+            access_token = token_data.get("access_token")
+            if not access_token:
+                logger.warning("Google OAuth token response did not contain an access token.")
+                return RedirectResponse(f"{frontend_signin}?error=google_profile", status_code=303)
+            profile_response = await http.get(
+                "https://openidconnect.googleapis.com/v1/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            if profile_response.status_code != 200:
+                logger.warning("Google userinfo request failed with HTTP status %s.", profile_response.status_code)
+                return RedirectResponse(f"{frontend_signin}?error=google_profile", status_code=303)
+            profile = profile_response.json()
+    except httpx.HTTPError:
+        logger.exception("Google OAuth HTTPS request failed.")
+        return RedirectResponse(f"{frontend_signin}?error=google_network", status_code=303)
+
+    email = str(profile.get("email") or "").strip().lower()
+    email_verified = profile.get("email_verified") is True or str(profile.get("email_verified")).lower() == "true"
+    if not email or not email_verified:
+        return RedirectResponse(f"{frontend_signin}?error=google_email_unverified", status_code=303)
+
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    is_new_user = existing is None
+    name = str(profile.get("name") or email.split("@")[0]).strip()
+    picture = profile.get("picture")
+    user_doc = await upsert_user(
+        email=email,
+        name=name,
+        picture=picture,
+        method="google",
+    )
+    await db.users.update_one(
+        {"user_id": user_doc["user_id"]},
+        {"$set": {"email_verified": True, "email_verified_at": datetime.now(timezone.utc)}},
+    )
+
+    redirect_response = RedirectResponse(f"{_frontend_url()}/workspace", status_code=303)
+    redirect_response.delete_cookie(
+        key="google_oauth_state",
+        path="/api/auth/google",
+        samesite="lax",
+        secure=True,
+    )
+    await create_session(user_doc["user_id"], redirect_response)
+
+    # Send a welcome message only for a newly created account, never on every login.
+    if is_new_user:
+        await _send_welcome_email(email, name)
+
+    return redirect_response
 
 
 @router.post("/signup", status_code=202)
