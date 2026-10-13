@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost } from "./api";
 
@@ -26,16 +26,9 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Keep OAuth state reactive. The callback removes the URL hash, but
-  // history.replaceState alone does not trigger a React render.
-  const [oauthInFlight, setOauthInFlight] = useState(
-    () => typeof window !== "undefined" && window.location.hash.includes("session_id="),
-  );
-
   const { data, isLoading } = useQuery({
     queryKey: SESSION_QUERY_KEY,
     queryFn: fetchSession,
-    enabled: !oauthInFlight,
     staleTime: 60_000,
     retry: false,
   });
@@ -48,7 +41,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       queryFn: fetchSession,
       staleTime: 0,
     });
-    setOauthInFlight(false);
   }, [queryClient]);
 
   const endSession = useCallback(async () => {
@@ -56,7 +48,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       await apiPost("/auth/logout");
     } finally {
       queryClient.clear();
-      setOauthInFlight(false);
       await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
     }
   }, [queryClient]);
@@ -64,11 +55,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionContextValue>(
     () => ({
       user: data ?? null,
-      isLoading: oauthInFlight ? false : isLoading,
+      isLoading,
       beginSession,
       endSession,
     }),
-    [data, isLoading, oauthInFlight, beginSession, endSession],
+    [data, isLoading, beginSession, endSession],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
@@ -80,11 +71,7 @@ export function useSession(): SessionContextValue {
   return ctx;
 }
 
-/**
- * Start the Emergent Google Auth flow.
- * REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
- */
+/** Start CPGist's own Google OAuth flow through the same-origin API proxy. */
 export function startGoogleAuth(): void {
-  const redirectUrl = `${window.location.origin}/workspace`;
-  window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  window.location.assign("/api/auth/google/start");
 }
