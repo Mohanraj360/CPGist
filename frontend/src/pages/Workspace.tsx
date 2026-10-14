@@ -79,10 +79,17 @@ export default function Workspace() {
                 <p className="mt-1 truncate text-sm text-slate-500" data-testid="workspace-account-email">{displayEmail}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={signOut} className="shrink-0 rounded-xl bg-white" data-testid="workspace-sign-out">
-              <LogOut aria-hidden="true" className="mr-2 size-4" />
-              Sign out
-            </Button>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Button onClick={() => window.location.assign("/api/auth/ai-analyst")} className="rounded-xl bg-navy-950 text-white hover:bg-navy-800" data-testid="workspace-open-ai-analyst">
+                <Sparkles aria-hidden="true" className="mr-2 size-4" />
+                Open AI Analyst
+                <ArrowUpRight aria-hidden="true" className="ml-2 size-4" />
+              </Button>
+              <Button variant="outline" onClick={signOut} className="rounded-xl bg-white" data-testid="workspace-sign-out">
+                <LogOut aria-hidden="true" className="mr-2 size-4" />
+                Sign out
+              </Button>
+            </div>
           </div>
           <div className="relative mt-6 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-3">
             <div className="flex items-center gap-3 rounded-xl bg-slate-50/80 p-3">
