@@ -418,6 +418,79 @@ async def session_probe(request: Request) -> User | None:
     return await current_user_optional(request)
 
 
+@router.get("/ai-analyst")
+async def start_ai_analyst_sso(request: Request) -> RedirectResponse:
+    """Bridge an authenticated CPGist session into the AI app using a one-time Supabase token."""
+    user = await current_user_optional(request)
+    if not user:
+        return RedirectResponse(f"{_frontend_url()}/signin?next=ai-analyst", status_code=303)
+
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    email = str((user_doc or {}).get("email") or "").strip().lower()
+    if not email or (user_doc or {}).get("email_verified") is not True:
+        return RedirectResponse(f"{_frontend_url()}/signin?error=ai_sso_unverified", status_code=303)
+
+    supabase_url = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    configured_ai_url = os.getenv("AI_ANALYST_URL", "https://cpgist-ai.vercel.app").strip().rstrip("/")
+    # Repair the legacy missing-hyphen hostname if it is still set in Render.
+    # This avoids sending users back to the marketing site during the SSO handoff.
+    if configured_ai_url.lower() in {"https://cpgistai.vercel.app", "http://cpgistai.vercel.app"}:
+        logger.warning("AI_ANALYST_URL contains the legacy missing-hyphen hostname; using https://cpgist-ai.vercel.app.")
+        ai_url = "https://cpgist-ai.vercel.app"
+    else:
+        ai_url = configured_ai_url
+    if not supabase_url or not service_key or not ai_url:
+        logger.error("AI Analyst SSO is not configured; check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and AI_ANALYST_URL.")
+        return RedirectResponse(f"{_frontend_url()}/workspace?error=ai_sso_unavailable", status_code=303)
+
+    token_hash = ""
+    token_type = ""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            headers = {
+                "apikey": service_key,
+                "Authorization": f"Bearer {service_key}",
+                "Content-Type": "application/json",
+            }
+            # Existing AI-app users receive a one-time magic-link token. If this
+            # email has never entered Supabase Auth, create its identity with a
+            # signup token. The service key never leaves this backend.
+            for candidate_type in ("magiclink", "signup"):
+                result = await client.post(
+                    f"{supabase_url}/auth/v1/admin/generate_link",
+                    headers=headers,
+                    json={"type": candidate_type, "email": email},
+                )
+                if result.status_code == 200:
+                    payload = result.json()
+                    properties = payload.get("properties") or {}
+                    token_hash = str(properties.get("hashed_token") or "")
+                    if token_hash:
+                        token_type = candidate_type
+                        break
+                elif candidate_type == "magiclink" and result.status_code in (400, 404, 422):
+                    continue
+                else:
+                    logger.warning("Supabase SSO token generation failed with HTTP status %s.", result.status_code)
+                    break
+    except httpx.HTTPError:
+        logger.exception("Supabase SSO token generation request failed.")
+
+    if not token_hash or token_type not in ("magiclink", "signup"):
+        return RedirectResponse(f"{_frontend_url()}/workspace?error=ai_sso_unavailable", status_code=303)
+
+    # Keep the one-time token in the URL fragment so browsers do not send it in
+    # HTTP requests or ordinary access logs. The AI app consumes it immediately.
+    response = RedirectResponse(
+        f"{ai_url}/sso#token_hash={quote(token_hash, safe='')}&type={quote(token_type, safe='')}",
+        status_code=303,
+    )
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    return response
+
+
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(request: Request, response: Response) -> LogoutResponse:
     await delete_session(request)
