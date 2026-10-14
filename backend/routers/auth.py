@@ -432,7 +432,14 @@ async def start_ai_analyst_sso(request: Request) -> RedirectResponse:
 
     supabase_url = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
     service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-    ai_url = os.getenv("AI_ANALYST_URL", "https://cpgistai.vercel.app").strip().rstrip("/")
+    configured_ai_url = os.getenv("AI_ANALYST_URL", "https://cpgist-ai.vercel.app").strip().rstrip("/")
+    # Repair the legacy missing-hyphen hostname if it is still set in Render.
+    # This avoids sending users back to the marketing site during the SSO handoff.
+    if configured_ai_url.lower() in {"https://cpgistai.vercel.app", "http://cpgistai.vercel.app"}:
+        logger.warning("AI_ANALYST_URL contains the legacy missing-hyphen hostname; using https://cpgist-ai.vercel.app.")
+        ai_url = "https://cpgist-ai.vercel.app"
+    else:
+        ai_url = configured_ai_url
     if not supabase_url or not service_key or not ai_url:
         logger.error("AI Analyst SSO is not configured; check SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and AI_ANALYST_URL.")
         return RedirectResponse(f"{_frontend_url()}/workspace?error=ai_sso_unavailable", status_code=303)
