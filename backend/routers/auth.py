@@ -389,6 +389,62 @@ async def verify_email(token: str) -> HTMLResponse:
     <p><a style="display:inline-block;background:#172554;color:white;padding:12px 18px;border-radius:8px;text-decoration:none" href="{safe_frontend}/signin">Go to sign in</a></p></main></body></html>""")
 
 
+
+def _ai_app_url() -> str:
+    return os.getenv("CPGIST_AI_URL", "https://cpgistai.vercel.app").rstrip("/")
+
+
+def _create_sso_ticket(user_id: str) -> str:
+    # Called only after the portal has authenticated the user.
+    token = secrets.token_urlsafe(32)
+    now = datetime.now(timezone.utc)
+    # The hash is stored, never the browser-facing bearer ticket itself.
+    db.sso_tickets.insert_one({
+        "user_id": user_id,
+        "token_hash": _token_hash(token),
+        "created_at": now,
+        "expires_at": now + timedelta(seconds=90),
+    })
+    return token
+
+
+@router.post("/sso/start")
+async def start_sso(request: Request) -> dict:
+    """Issue a short-lived, single-use ticket for the real CPGist AI app."""
+    user = await current_user_optional(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Sign in to the CPGist company portal first.")
+    ticket = await _create_sso_ticket(user.user_id)
+    return {"url": f"{_ai_app_url()}/sso?ticket={quote(ticket)}"}
+
+
+@router.post("/sso/exchange")
+async def exchange_sso_ticket(request: Request, payload: dict) -> dict:
+    """Private server-to-server ticket exchange; configured shared secret is mandatory."""
+    expected = os.getenv("CPGIST_SSO_SHARED_SECRET", "").strip()
+    supplied = request.headers.get("x-cpgist-sso-secret", "")
+    if not expected or not secrets.compare_digest(expected, supplied):
+        raise HTTPException(status_code=401, detail="SSO exchange is not authorized.")
+    ticket = str(payload.get("ticket") or "")
+    if not ticket or len(ticket) > 256:
+        raise HTTPException(status_code=400, detail="Invalid SSO ticket.")
+    now = datetime.now(timezone.utc)
+    record = await db.sso_tickets.find_one_and_delete({
+        "token_hash": _token_hash(ticket),
+        "expires_at": {"$gt": now},
+    })
+    if not record:
+        raise HTTPException(status_code=401, detail="This sign-in link has expired or already been used. Return to the company portal and try again.")
+    user = await db.users.find_one({"user_id": record["user_id"]}, {"_id": 0})
+    if not user or user.get("email_verified") is not True:
+        raise HTTPException(status_code=403, detail="The portal account is not verified.")
+    return {
+        "email": str(user.get("email") or "").lower(),
+        "name": str(user.get("name") or ""),
+        "email_verified": True,
+    }
+
+
 @router.post("/signin", response_model=User)
 async def signin(payload: PasswordSignInRequest, response: Response) -> User:
     email = str(payload.email).lower().strip()
