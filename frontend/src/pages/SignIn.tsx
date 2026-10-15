@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
@@ -27,7 +27,6 @@ export default function SignIn() {
     path: "/signin",
   });
 
-  const navigate = useNavigate();
   const { user, isLoading, beginSession } = useSession();
   const [mode, setMode] = useState<Mode>(() =>
     new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin",
