@@ -29,7 +29,9 @@ export default function SignIn() {
 
   const navigate = useNavigate();
   const { user, isLoading, beginSession } = useSession();
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(() =>
+    new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin",
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -106,6 +108,10 @@ export default function SignIn() {
     setMode(next);
     setErrors({});
     setFormError(null);
+    const url = new URL(window.location.href);
+    if (next === "signup") url.searchParams.set("mode", "signup");
+    else url.searchParams.delete("mode");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   };
 
   return (
