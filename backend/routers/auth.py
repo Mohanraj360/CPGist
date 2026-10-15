@@ -297,7 +297,8 @@ async def google_auth_callback(
         {"$set": {"email_verified": True, "email_verified_at": datetime.now(timezone.utc)}},
     )
 
-    redirect_response = RedirectResponse(f"{_frontend_url()}/workspace", status_code=303)
+    sso_ticket = await _create_sso_ticket(user_doc["user_id"])
+    redirect_response = RedirectResponse(f"{_ai_app_url()}/sso?ticket={quote(sso_ticket)}", status_code=303)
     redirect_response.delete_cookie(
         key="google_oauth_state",
         path="/",
