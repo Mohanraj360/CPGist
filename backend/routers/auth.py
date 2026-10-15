@@ -394,12 +394,12 @@ def _ai_app_url() -> str:
     return os.getenv("CPGIST_AI_URL", "https://cpgistai.vercel.app").rstrip("/")
 
 
-def _create_sso_ticket(user_id: str) -> str:
+async def _create_sso_ticket(user_id: str) -> str:
     # Called only after the portal has authenticated the user.
     token = secrets.token_urlsafe(32)
     now = datetime.now(timezone.utc)
     # The hash is stored, never the browser-facing bearer ticket itself.
-    db.sso_tickets.insert_one({
+    await db.sso_tickets.insert_one({
         "user_id": user_id,
         "token_hash": _token_hash(token),
         "created_at": now,
