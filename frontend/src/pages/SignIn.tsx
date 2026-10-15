@@ -40,10 +40,21 @@ export default function SignIn() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Already signed in → go straight to the workspace.
+  // A portal session should open the real AI app, not the illustrative portal preview.
   useEffect(() => {
-    if (!isLoading && user) navigate("/workspace", { replace: true });
-  }, [isLoading, user, navigate]);
+    if (isLoading || !user) return;
+    let cancelled = false;
+    void apiPost<{ url: string }>("/auth/sso/start", {}).then((handoff) => {
+      if (cancelled) return;
+      if (!handoff?.url || !handoff.url.startsWith("https://cpgistai.vercel.app/sso?ticket=")) {
+        throw new Error("The secure CPGist AI handoff was not returned.");
+      }
+      window.location.assign(handoff.url);
+    }).catch((error) => {
+      if (!cancelled) setFormError(apiErrorMessage(error, "You are signed in, but CPGist AI could not be opened. Please try again."));
+    });
+    return () => { cancelled = true; };
+  }, [isLoading, user]);
 
   // Show a useful message when Google's OAuth callback returns an error.
   useEffect(() => {
@@ -85,16 +96,6 @@ export default function SignIn() {
       await beginSession();
       const displayName = "name" in data ? data.name : undefined;
       toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}. Opening CPGist AI…`);
-      try {
-        const handoff = await apiPost<{ url: string }>("/auth/sso/start", {});
-        if (!handoff?.url || !handoff.url.startsWith("https://cpgistai.vercel.app/sso?ticket=")) {
-          throw new Error("The secure CPGist AI handoff was not returned.");
-        }
-        window.location.assign(handoff.url);
-      } catch (error) {
-        setFormError(apiErrorMessage(error, "You are signed in, but CPGist AI could not be opened. Please try again."));
-        navigate("/workspace", { replace: true });
-      }
     },
     onError: (err) => setFormError(apiErrorMessage(err, "We couldn't sign you in. Please try again.")),
   });
