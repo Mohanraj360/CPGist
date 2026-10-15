@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
@@ -27,7 +27,6 @@ export default function SignIn() {
     path: "/signin",
   });
 
-  const navigate = useNavigate();
   const { user, isLoading, beginSession } = useSession();
   const [mode, setMode] = useState<Mode>(() =>
     new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin",
@@ -40,10 +39,21 @@ export default function SignIn() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Already signed in → go straight to the workspace.
+  // A portal session should open the real AI app, not the illustrative portal preview.
   useEffect(() => {
-    if (!isLoading && user) navigate("/workspace", { replace: true });
-  }, [isLoading, user, navigate]);
+    if (isLoading || !user) return;
+    let cancelled = false;
+    void apiPost<{ url: string }>("/auth/sso/start", {}).then((handoff) => {
+      if (cancelled) return;
+      if (!handoff?.url || !handoff.url.startsWith("https://cpgistai.vercel.app/sso?ticket=")) {
+        throw new Error("The secure CPGist AI handoff was not returned.");
+      }
+      window.location.assign(handoff.url);
+    }).catch((error) => {
+      if (!cancelled) setFormError(apiErrorMessage(error, "You are signed in, but CPGist AI could not be opened. Please try again."));
+    });
+    return () => { cancelled = true; };
+  }, [isLoading, user]);
 
   // Show a useful message when Google's OAuth callback returns an error.
   useEffect(() => {
@@ -84,8 +94,7 @@ export default function SignIn() {
       }
       await beginSession();
       const displayName = "name" in data ? data.name : undefined;
-      toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}.`);
-      navigate("/workspace", { replace: true });
+      toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}. Opening CPGist AI…`);
     },
     onError: (err) => setFormError(apiErrorMessage(err, "We couldn't sign you in. Please try again.")),
   });
