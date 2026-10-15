@@ -84,8 +84,17 @@ export default function SignIn() {
       }
       await beginSession();
       const displayName = "name" in data ? data.name : undefined;
-      toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}.`);
-      navigate("/workspace", { replace: true });
+      toast.success(`Welcome${displayName ? `, ${displayName.split(" ")[0]}` : ""}. Opening CPGist AI…`);
+      try {
+        const handoff = await apiPost<{ url: string }>("/auth/sso/start", {});
+        if (!handoff?.url || !handoff.url.startsWith("https://cpgistai.vercel.app/sso?ticket=")) {
+          throw new Error("The secure CPGist AI handoff was not returned.");
+        }
+        window.location.assign(handoff.url);
+      } catch (error) {
+        setFormError(apiErrorMessage(error, "You are signed in, but CPGist AI could not be opened. Please try again."));
+        navigate("/workspace", { replace: true });
+      }
     },
     onError: (err) => setFormError(apiErrorMessage(err, "We couldn't sign you in. Please try again.")),
   });
